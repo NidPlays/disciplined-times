@@ -2,6 +2,10 @@
 
 All notable changes to Disciplined Times. The project uses [Semantic Versioning](https://semver.org); see `AGENTS.md` for when to bump which number.
 
+## 0.3.1
+
+- **Week:** the chart now follows your finger while you swipe, and the new week slides in from the side (also when using the arrow buttons), with a little vibration on supported phones, so it's clear the week changed.
+
 ## 0.3.0
 
 - **Settings:** a new **View changelog** button shows what changed in each version, right inside the app (works offline too).

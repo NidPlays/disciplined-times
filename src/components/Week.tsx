@@ -2,6 +2,7 @@ import { addDays, addWeeks, format, isToday, startOfWeek } from 'date-fns'
 import { useRef, useState } from 'react'
 import { formatMinutes, isScheduledOn, minutesBetween, targetFor, toKey, weeklyPlan } from '../lib/schedule'
 import { useStore } from '../lib/store'
+import { haptic } from '../lib/ui'
 import { Chevron } from './Today'
 
 export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
@@ -27,24 +28,56 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
   const totalDone = perDay.reduce((s, x) => s + x.done, 0)
   const totalPlan = active.reduce((s, g) => s + weeklyPlan(g), 0)
 
+  // Which way the last week change went, so the new week slides in from that side.
+  const [dir, setDir] = useState<'next' | 'prev' | null>(null)
+  const goWeek = (delta: number) => {
+    setDir(delta > 0 ? 'next' : 'prev')
+    setAnchor((a) => addWeeks(a, delta))
+  }
+  const goToday = () => {
+    const now = new Date()
+    if (toKey(startOfWeek(now, { weekStartsOn: settings.weekStartsOn })) !== startKey) setDir(now > start ? 'next' : 'prev')
+    setAnchor(now)
+  }
+  const slideIn = dir === 'next' ? 'animate-from-right' : dir === 'prev' ? 'animate-from-left' : ''
+
   // Horizontal swipe on the chart: swipe left → next week, swipe right → previous week.
-  const touch = useRef<{ x: number; y: number } | null>(null)
+  // The bars follow the finger while dragging, so it's clear the gesture is working.
+  const touch = useRef<{ x: number; y: number; horizontal: boolean | null } | null>(null)
   const swiped = useRef(false)
+  const [drag, setDrag] = useState(0)
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0]
-    touch.current = { x: t.clientX, y: t.clientY }
+    touch.current = { x: t.clientX, y: t.clientY, horizontal: null }
     swiped.current = false
+  }
+  const onTouchMove = (e: React.TouchEvent) => {
+    const s = touch.current
+    if (!s) return
+    const t = e.touches[0]
+    const dx = t.clientX - s.x
+    const dy = t.clientY - s.y
+    // Decide once whether this is a sideways swipe or a vertical scroll.
+    if (s.horizontal === null && Math.hypot(dx, dy) > 8) s.horizontal = Math.abs(dx) > Math.abs(dy)
+    if (s.horizontal) setDrag(dx)
+  }
+  const endDrag = (dx: number, dy: number) => {
+    touch.current = null
+    setDrag(0)
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    swiped.current = true
+    haptic()
+    goWeek(dx < 0 ? 1 : -1)
   }
   const onTouchEnd = (e: React.TouchEvent) => {
     const s = touch.current
-    touch.current = null
     if (!s) return
     const t = e.changedTouches[0]
-    const dx = t.clientX - s.x
-    const dy = t.clientY - s.y
-    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return
-    swiped.current = true
-    setAnchor((a) => addWeeks(a, dx < 0 ? 1 : -1))
+    endDrag(t.clientX - s.x, t.clientY - s.y)
+  }
+  const onTouchCancel = () => {
+    touch.current = null
+    setDrag(0)
   }
   // Swallow the tap that would otherwise open a day after a swipe ends on a bar.
   const onClickCapture = (e: React.MouseEvent) => {
@@ -58,26 +91,27 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
   return (
     <div className="space-y-5">
       <header className="flex items-center justify-between md:justify-center md:gap-8">
-        <button onClick={() => setAnchor(addWeeks(anchor, -1))} className="rounded-full p-2 text-n-400 hover:bg-n-800" aria-label="Previous week">
+        <button onClick={() => goWeek(-1)} className="rounded-full p-2 text-n-400 hover:bg-n-800" aria-label="Previous week">
           <Chevron dir="left" />
         </button>
-        <button onClick={() => setAnchor(new Date())} className="text-center">
+        <button onClick={goToday} className="text-center">
           <div className="text-2xl font-bold">Week</div>
-          <div className="text-sm text-n-400">
+          <div key={startKey} className={`text-sm text-n-400 ${slideIn}`}>
             {format(days[0], 'd MMM')} – {format(days[6], 'd MMM')}
           </div>
         </button>
-        <button onClick={() => setAnchor(addWeeks(anchor, 1))} className="rounded-full p-2 text-n-400 hover:bg-n-800" aria-label="Next week">
+        <button onClick={() => goWeek(1)} className="rounded-full p-2 text-n-400 hover:bg-n-800" aria-label="Next week">
           <Chevron dir="right" />
         </button>
       </header>
 
-      <div className="space-y-5 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start lg:gap-6 lg:space-y-0">
+      <div className="space-y-5 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start lg:gap-6 lg:space-y-0 overflow-x-clip">
       <section
-        className="touch-pan-y select-none rounded-3xl border border-n-800 bg-n-900 p-4 lg:sticky lg:top-8"
+        className="touch-pan-y select-none overflow-hidden rounded-3xl border border-n-800 bg-n-900 p-4 lg:sticky lg:top-8"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        onTouchCancel={() => (touch.current = null)}
+        onTouchMove={onTouchMove}
+        onTouchCancel={onTouchCancel}
         onClickCapture={onClickCapture}
       >
         <div className="mb-4 flex items-baseline justify-between">
@@ -86,7 +120,12 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
             {formatMinutes(totalDone)} <span className="text-n-500">/ {formatMinutes(totalPlan)}</span>
           </span>
         </div>
-        <div className="flex h-36 items-end gap-2 lg:h-56">
+        <div
+          key={startKey}
+          className={`flex h-36 items-end gap-2 lg:h-56 ${drag ? '' : 'transition-transform duration-200'} ${slideIn}`}
+          // Follow the finger with some resistance, and fade a little as the week is about to change.
+          style={drag ? { transform: `translateX(${drag * 0.6}px)`, opacity: Math.max(0.4, 1 - Math.abs(drag) / 400) } : undefined}
+        >
           {perDay.map(({ d, done, plan }) => (
             <button key={d.toISOString()} onClick={() => onPickDay(d)} className="flex h-full flex-1 flex-col items-center gap-1" aria-label={`${format(d, 'EEEE')}: ${formatMinutes(done)} logged`}>
               <div className="relative w-full flex-1">
@@ -100,7 +139,7 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
         <p className="mt-3 text-xs text-n-500">Dashed outline = daily-goal plan. Tap a day to open it, swipe to change week.</p>
       </section>
 
-      <section className="space-y-2">
+      <section key={startKey} className={`space-y-2 ${slideIn}`}>
         {active.length === 0 && <p className="text-center text-n-500">No goals yet.</p>}
         {active.map((g) => {
           const done = minutesBetween(logs, g.id, startKey, endKey)
