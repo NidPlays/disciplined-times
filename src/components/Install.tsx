@@ -89,10 +89,10 @@ export function InstallBanner() {
   const [visible, setVisible] = useState(false)
   const [closed, setClosed] = useState(false)
 
-  // Wait until the page has settled and the 3s "ready to work offline" notice is gone.
+  // Give the page a moment to settle before popping anything up.
   useEffect(() => {
     if (!eligible) return
-    const t = setTimeout(() => setVisible(true), 4000)
+    const t = setTimeout(() => setVisible(true), 2500)
     return () => clearTimeout(t)
   }, [eligible])
 
