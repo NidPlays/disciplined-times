@@ -2,12 +2,11 @@ import { addDays } from 'date-fns'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { GoalEditor } from './components/GoalEditor'
 import { Goals } from './components/Goals'
-import { InstallBanner } from './components/Install'
+import { Notices } from './components/Notices'
 import { QuickLog } from './components/QuickLog'
 import { Settings } from './components/Settings'
 import { ToastHost } from './components/Toast'
 import { Today } from './components/Today'
-import { UpdatePrompt } from './components/UpdatePrompt'
 import { Week } from './components/Week'
 import { formatMinutes, toKey } from './lib/schedule'
 import { useStore } from './lib/store'
@@ -140,8 +139,7 @@ export default function App() {
 
   return (
     <div className="min-h-full md:flex">
-      <UpdatePrompt />
-      <InstallBanner />
+      <Notices />
 
       {/* Desktop / tablet sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 border-r border-n-800 bg-n-950 p-4 md:flex lg:w-64">

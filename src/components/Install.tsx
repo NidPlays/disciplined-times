@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { Notice } from './Notices'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -79,11 +80,12 @@ const rememberDismissal = () => {
 }
 
 /**
- * A small, dismissible banner shown only on phones/tablets that aren't already
- * running the installed app. On Android/Chromium it triggers the native install
- * prompt; on iOS it explains Share → Add to Home Screen. Dismissing hides it for 14 days.
+ * The "install as an app" notice for the top notification stack. Only on phones/tablets
+ * that aren't already running the installed app: on Android/Chromium it triggers the
+ * native install prompt; on iOS it explains Share → Add to Home Screen.
+ * Dismissing hides it for 14 days.
  */
-export function InstallBanner() {
+export function useInstallNotice(): Notice | null {
   useInstallState()
   const [eligible] = useState(() => typeof window !== 'undefined' && isMobileDevice() && !isStandalone() && !recentlyDismissed())
   const [visible, setVisible] = useState(false)
@@ -99,44 +101,31 @@ export function InstallBanner() {
   const ios = isIOS()
   if (!eligible || !visible || closed || isStandalone() || (!deferred && !ios)) return null
 
-  const dismiss = () => {
-    rememberDismissal()
-    setClosed(true)
+  return {
+    id: 'install',
+    icon: <img src={`${import.meta.env.BASE_URL}pwa-64x64.png`} alt="" className="h-10 w-10 rounded-xl" />,
+    title: 'Install Disciplined Times',
+    body: ios ? (
+      <>
+        Tap <strong className="text-n-200">Share</strong> <ShareIcon /> then <strong className="text-n-200">Add to Home Screen</strong>.
+      </>
+    ) : (
+      'Add it to your home screen for full-screen, offline use.'
+    ),
+    action: ios
+      ? undefined
+      : {
+          label: 'Install',
+          run: async () => {
+            await promptInstall()
+            setClosed(true)
+          },
+        },
+    dismiss: () => {
+      rememberDismissal()
+      setClosed(true)
+    },
   }
-
-  return (
-    <div className="fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-safe md:hidden" role="dialog" aria-label="Install Disciplined Times">
-      <div className="animate-fade flex w-full max-w-xl items-start gap-3 rounded-2xl border border-n-700 bg-n-800 p-3 shadow-xl">
-        <img src={`${import.meta.env.BASE_URL}pwa-64x64.png`} alt="" className="h-10 w-10 shrink-0 rounded-xl" />
-        <div className="min-w-0 flex-1 text-sm">
-          <div className="font-semibold text-n-100">Install Disciplined Times</div>
-          {ios ? (
-            <p className="mt-0.5 text-n-400">
-              Tap <strong className="text-n-200">Share</strong> <ShareIcon /> then <strong className="text-n-200">Add to Home Screen</strong>.
-            </p>
-          ) : (
-            <p className="mt-0.5 text-n-400">Add it to your home screen for full-screen, offline use.</p>
-          )}
-        </div>
-        <div className="flex shrink-0 items-center gap-1">
-          {!ios && (
-            <button
-              onClick={async () => {
-                await promptInstall()
-                setClosed(true)
-              }}
-              className="rounded-xl bg-accent px-3 py-1.5 text-sm font-semibold text-on-accent"
-            >
-              Install
-            </button>
-          )}
-          <button onClick={dismiss} className="grid h-8 w-8 place-items-center rounded-xl text-lg text-n-400" aria-label="Dismiss">
-            ×
-          </button>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 export function InstallCard() {
