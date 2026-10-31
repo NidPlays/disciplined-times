@@ -8,7 +8,7 @@ A website for planning **hours per goal** and logging time in quick taps. It wor
 - Daily goals repeat on the weekdays you pick (Every day / Weekdays / Weekends / custom). They can also have **different hours per weekday**, e.g. 1h Mon–Thu and 3h on Saturday.
 - Week and month goals show progress for the whole period plus a **suggested pace for today**.
 - Tap the big **+30** button to log time. The step size is set per goal. Other amounts and corrections are one tap away, and every log can be undone.
-- A **Week** view shows a bar chart of logged time against the plan, plus a per-goal heat strip.
+- A **Week** view shows a bar chart of logged time against the plan, plus a per-goal heat strip. Swipe the chart left or right to change week.
 - **Works as a normal website.** On desktop it has a sidebar, a multi-column layout and keyboard shortcuts (`N` new goal, `1`–`4` switch tabs, `←`/`→` change day, `T` today). Tabs live in the URL hash (`#week`, `#goals`), so browser back/forward and bookmarks work.
 - **Themes:** Midnight, Ocean, Forest, Sunset, Rose, Grape and Mono. Each has a dark and a light version, and you can choose Light, Dark or follow the device (System) under Settings → Appearance.
 - **Installs as an app** on iOS, Android and desktop, and works offline. All data stays on the device, with JSON export and import for backups.
