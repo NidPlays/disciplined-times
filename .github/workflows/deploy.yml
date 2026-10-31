@@ -1,4 +1,8 @@
-name: Deploy to GitHub Pages
+name: CI & Deploy
+
+# - Pull requests (including from forks): install, test and build only. Never deploy.
+# - Pushes to main on NidPlays/disciplined-times: build and deploy to GitHub Pages.
+# - Forks of this repo never deploy, even from their own main branch.
 
 on:
   push:
@@ -6,18 +10,24 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Least privilege by default; only the deploy job gets Pages permissions.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  # Cancel superseded PR runs, but never interrupt a production deploy.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Deploy only from the default branch of the upstream repository.
+  IS_DEPLOY: ${{ github.repository == 'NidPlays/disciplined-times' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ env.IS_DEPLOY }}
     steps:
       - uses: actions/checkout@v5
 
@@ -29,25 +39,33 @@ jobs:
 
       - run: bun test
 
+      # Reads the Pages URL so the base path is right (also handles custom domains).
+      # Skipped for PRs and forks, which don't need Pages and may lack access to it.
       - name: Configure Pages
+        if: env.IS_DEPLOY == 'true'
         id: pages
         uses: actions/configure-pages@v5
 
-      # base_path is "/<repo>" for project sites, or "" when a custom domain is set.
+      # base_path is "/<repo>" for project sites, or "" with a custom domain.
+      # PR builds fall back to "/<repo>/" so they match the production layout.
       - name: Build
         run: bun run build
         env:
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+          BASE_PATH: ${{ env.IS_DEPLOY == 'true' && format('{0}/', steps.pages.outputs.base_path) || format('/{0}/', github.event.repository.name) }}
 
-      - uses: actions/upload-pages-artifact@v4
+      - name: Upload Pages artifact
+        if: env.IS_DEPLOY == 'true'
+        uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 
   deploy:
-    # Only publish from main; PRs just build and test.
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
+    if: needs.build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
