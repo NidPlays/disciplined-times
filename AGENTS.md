@@ -25,6 +25,7 @@ src/
     themes.ts        themes + WCAG contrast enforcement (tested in themes.test.ts)
     store.ts         persisted Zustand store, export/import
     types.ts         Goal, LogEntry, Settings
+    links.ts         external-link handling for the installed app (tested in links.test.ts)
     ui.ts            toast + haptics
 public/              static assets and icons (regenerate PNGs with `bun run icons`)
 docs/                screenshots used by the README
