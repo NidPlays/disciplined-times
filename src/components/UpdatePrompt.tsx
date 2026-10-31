@@ -1,12 +1,33 @@
 import { useEffect } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
+const HOUR = 60 * 60 * 1000
+const MIN_GAP = 60 * 1000
+
+// Browsers only look for a new service worker on navigation, so an app left open (or parked in
+// the background on a phone) would never see an update. Check again whenever the app comes back
+// to the foreground, and hourly while it stays open.
+function watchForUpdates(registration: ServiceWorkerRegistration) {
+  let last = Date.now()
+  const check = () => {
+    if (!navigator.onLine || Date.now() - last < MIN_GAP) return
+    last = Date.now()
+    registration.update().catch(() => {})
+  }
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && check())
+  setInterval(check, HOUR)
+}
+
 export function UpdatePrompt() {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     offlineReady: [offlineReady, setOfflineReady],
     updateServiceWorker,
-  } = useRegisterSW()
+  } = useRegisterSW({
+    onRegisteredSW(_url, registration) {
+      if (registration) watchForUpdates(registration)
+    },
+  })
 
   // The "offline ready" note is informational only; hide it after a moment.
   useEffect(() => {
