@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { exportData, isExportShape, useStore } from '../lib/store'
 import { useUi } from '../lib/ui'
+import { chromeHref } from '../lib/links'
 import { Appearance } from './Appearance'
 import { InstallCard } from './Install'
 
@@ -86,7 +87,7 @@ export function Settings() {
 
       <p className="text-center text-xs text-n-500">
         Disciplined Times v{__APP_VERSION__} ·{' '}
-        <a className="underline hover:text-n-400" href="https://github.com/NidPlays/disciplined-times" target="_blank" rel="noreferrer">
+        <a className="underline hover:text-n-400" href={chromeHref('https://github.com/NidPlays/disciplined-times')} target="_blank" rel="noopener noreferrer">
           Source on GitHub
         </a>
       </p>
