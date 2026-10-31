@@ -36,10 +36,10 @@ export function InstallCard() {
 
   return (
     <section className="space-y-3 rounded-3xl border border-emerald-500/30 bg-emerald-500/5 p-4">
-      <div className="font-medium">Install the app</div>
+      <div className="font-medium">Install as an app (optional)</div>
       {deferred ? (
         <>
-          <p className="text-sm text-slate-400">Add Disciplined Times to your home screen for a full-screen app that works offline. Long-press the icon for quick “+30 min” logging.</p>
+          <p className="text-sm text-slate-400">Everything works right here in the browser. Installing adds an app icon, its own window and quick “+30 min” shortcuts on the icon.</p>
           <button
             onClick={async () => {
               await deferred?.prompt()
@@ -56,7 +56,7 @@ export function InstallCard() {
           In Safari, tap <strong className="text-slate-200">Share</strong> <span aria-hidden>⎋</span> then <strong className="text-slate-200">Add to Home Screen</strong>.
         </p>
       ) : (
-        <p className="text-sm text-slate-400">Use your browser menu and choose “Install app” or “Add to Home screen”.</p>
+        <p className="text-sm text-slate-400">Everything works right here in the browser. To also get an app icon, use your browser menu and choose “Install app” or “Add to Home screen” (Chrome, Edge, Safari on macOS & iOS).</p>
       )}
     </section>
   )

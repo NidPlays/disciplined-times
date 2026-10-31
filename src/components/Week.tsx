@@ -29,7 +29,7 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
 
   return (
     <div className="space-y-5">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between md:justify-center md:gap-8">
         <button onClick={() => setAnchor(addWeeks(anchor, -1))} className="rounded-full p-2 text-slate-400 hover:bg-slate-800" aria-label="Previous week">
           <Chevron dir="left" />
         </button>
@@ -44,14 +44,15 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
         </button>
       </header>
 
-      <section className="rounded-3xl border border-slate-800 bg-slate-900 p-4">
+      <div className="space-y-5 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start lg:gap-6 lg:space-y-0">
+      <section className="rounded-3xl border border-slate-800 bg-slate-900 p-4 lg:sticky lg:top-8">
         <div className="mb-4 flex items-baseline justify-between">
           <span className="text-sm text-slate-400">Logged this week</span>
           <span className="font-semibold tabular-nums">
             {formatMinutes(totalDone)} <span className="text-slate-500">/ {formatMinutes(totalPlan)}</span>
           </span>
         </div>
-        <div className="flex h-36 items-end gap-2">
+        <div className="flex h-36 items-end gap-2 lg:h-56">
           {perDay.map(({ d, done, plan }) => (
             <button key={d.toISOString()} onClick={() => onPickDay(d)} className="flex h-full flex-1 flex-col items-center gap-1" aria-label={`${format(d, 'EEEE')}: ${formatMinutes(done)} logged`}>
               <div className="relative w-full flex-1">
@@ -106,6 +107,7 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
           )
         })}
       </section>
+      </div>
     </div>
   )
 }

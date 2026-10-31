@@ -4,7 +4,12 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import pkg from './package.json' with { type: 'json' }
 
+// GitHub Pages serves project sites from a sub-path (https://<user>.github.io/<repo>/).
+// The deploy workflow sets BASE_PATH; locally and on a custom domain / Cloudflare it is '/'.
+const base = process.env.BASE_PATH ?? '/'
+
 export default defineConfig({
+  base,
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
@@ -13,15 +18,15 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'logo.svg'],
       manifest: {
-        id: '/',
+        id: base,
         name: 'Disciplined Times',
         short_name: 'Disciplined',
         description: 'Plan hours for your goals per day, week or month, and log time in 30-minute taps.',
-        start_url: '/',
-        scope: '/',
+        // Relative URLs resolve against the manifest's location, so they work under any base path.
+        start_url: './',
+        scope: './',
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
-        orientation: 'portrait',
         background_color: '#0f172a',
         theme_color: '#0f172a',
         categories: ['productivity', 'lifestyle'],
@@ -37,26 +42,26 @@ export default defineConfig({
             name: 'Quick log 30 min',
             short_name: '+30 min',
             description: 'Pick a goal and add 30 minutes',
-            url: '/?action=quick-log&minutes=30',
+            url: './?action=quick-log&minutes=30',
             icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
           },
           {
             name: 'Today',
             short_name: 'Today',
-            url: '/?tab=today',
+            url: './',
             icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
           },
           {
             name: 'New goal',
             short_name: 'New goal',
-            url: '/?action=new-goal',
+            url: './?action=new-goal',
             icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
           },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
-        navigateFallback: '/index.html',
+        navigateFallback: `${base}index.html`,
       },
       devOptions: { enabled: false },
     }),

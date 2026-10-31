@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { addDays } from 'date-fns'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { GoalEditor } from './components/GoalEditor'
 import { Goals } from './components/Goals'
 import { QuickLog } from './components/QuickLog'
@@ -20,8 +21,31 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'settings', label: 'Settings', icon: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' },
 ]
 
+function tabFromHash(): Tab {
+  const h = location.hash.slice(1) as Tab
+  return TABS.some((t) => t.id === h) ? h : 'today'
+}
+
 export default function App() {
-  const [tab, setTab] = useState<Tab>('today')
+  const [tab, setTab] = useState<Tab>(tabFromHash)
+  const tabRef = useRef(tab)
+  tabRef.current = tab
+
+  // Keep the tab in the URL hash (#week, #goals…) so browser back/forward and
+  // bookmarks work on the website. Hash routing needs no server config on GitHub Pages.
+  useEffect(() => {
+    const want = tab === 'today' ? '' : `#${tab}`
+    if (location.hash !== want) history.pushState(null, '', location.pathname + location.search + want)
+  }, [tab])
+  useEffect(() => {
+    const onHash = () => setTab(tabFromHash())
+    window.addEventListener('popstate', onHash)
+    window.addEventListener('hashchange', onHash)
+    return () => {
+      window.removeEventListener('popstate', onHash)
+      window.removeEventListener('hashchange', onHash)
+    }
+  }, [])
   const [day, setDay] = useState(() => new Date())
   const [editing, setEditing] = useState<{ open: boolean; goal: Goal | null }>({ open: false, goal: null })
   const [quick, setQuick] = useState<{ open: boolean; minutes: number }>({ open: false, minutes: 30 })
@@ -56,7 +80,7 @@ export default function App() {
         useUi.getState().notify('That goal no longer exists')
       }
     }
-    history.replaceState(null, '', location.pathname)
+    history.replaceState(null, '', location.pathname + location.hash)
   }, [openNew])
 
   // Roll over to the new day if the app was left open past midnight.
@@ -68,48 +92,105 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
 
+  const go = useCallback((t: Tab) => {
+    if (t === tabRef.current && t === 'today') setDay(new Date())
+    setTab(t)
+  }, [])
+
+  // Desktop keyboard shortcuts: N = new goal, 1-4 = tabs, ←/→ = change day, T = today.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || editing.open || quick.open) return
+      const el = e.target as HTMLElement
+      if (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return
+      const k = e.key.toLowerCase()
+      if (k === 'n') openNew()
+      else if (k >= '1' && k <= '4') go(TABS[Number(k) - 1].id)
+      else if (tabRef.current === 'today' && k === 'arrowleft') setDay((d) => addDays(d, -1))
+      else if (tabRef.current === 'today' && k === 'arrowright') setDay((d) => addDays(d, 1))
+      else if (k === 't') {
+        setTab('today')
+        setDay(new Date())
+      } else return
+      e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [editing.open, quick.open, openNew, go])
+
+  const navIcon = (d: string) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={d} />
+    </svg>
+  )
+
   return (
-    <div className="mx-auto flex min-h-full max-w-xl flex-col">
+    <div className="min-h-full md:flex">
       <UpdatePrompt />
-      <main className="pt-safe flex-1 px-4 pb-28">
-        {tab === 'today' && <Today day={day} setDay={setDay} onEdit={openEdit} onNew={openNew} />}
-        {tab === 'week' && (
-          <Week
-            onPickDay={(d) => {
-              setDay(d)
-              setTab('today')
-            }}
-          />
-        )}
-        {tab === 'goals' && <Goals onEdit={openEdit} onNew={openNew} />}
-        {tab === 'settings' && <Settings />}
+
+      {/* Desktop / tablet sidebar */}
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 border-r border-slate-800 bg-slate-950 p-4 md:flex lg:w-64">
+        <a href={import.meta.env.BASE_URL} className="mb-6 flex items-center gap-3 px-2 py-1" onClick={(e) => (e.preventDefault(), go('today'))}>
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="h-9 w-9" />
+          <span className="text-lg font-bold leading-tight">Disciplined Times</span>
+        </a>
+        {TABS.map((t, i) => (
+          <button
+            key={t.id}
+            onClick={() => go(t.id)}
+            aria-current={tab === t.id ? 'page' : undefined}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${tab === t.id ? 'bg-slate-800 text-emerald-400' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}
+          >
+            {navIcon(t.icon)}
+            <span className="flex-1 text-left">{t.label}</span>
+            <kbd className="text-[10px] text-slate-600">{i + 1}</kbd>
+          </button>
+        ))}
+        <button onClick={openNew} className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-2.5 text-sm font-semibold text-slate-950 hover:bg-emerald-400">
+          + New goal <kbd className="text-[10px] opacity-60">N</kbd>
+        </button>
+        <p className="mt-auto px-2 text-xs leading-relaxed text-slate-600">
+          Shortcuts: <kbd>N</kbd> new goal · <kbd>1–4</kbd> tabs · <kbd>←</kbd>/<kbd>→</kbd> day · <kbd>T</kbd> today
+        </p>
+      </aside>
+
+      <main className="pt-safe min-w-0 flex-1 px-4 pb-28 md:px-8 md:pt-8 md:pb-12">
+        <div className={`mx-auto ${tab === 'settings' ? 'max-w-2xl' : 'max-w-xl md:max-w-5xl'}`}>
+          {tab === 'today' && <Today day={day} setDay={setDay} onEdit={openEdit} onNew={openNew} />}
+          {tab === 'week' && (
+            <Week
+              onPickDay={(d) => {
+                setDay(d)
+                setTab('today')
+              }}
+            />
+          )}
+          {tab === 'goals' && <Goals onEdit={openEdit} onNew={openNew} />}
+          {tab === 'settings' && <Settings />}
+        </div>
       </main>
 
       {tab === 'today' && (
         <button
           onClick={openNew}
-          className="fixed bottom-24 right-[max(1rem,calc(50%-17rem))] z-30 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500 text-3xl font-light text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400"
+          className="fixed bottom-24 right-4 z-30 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500 text-3xl font-light text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 md:hidden"
           aria-label="New goal"
         >
           +
         </button>
       )}
 
-      <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/90 backdrop-blur">
+      {/* Phone bottom navigation */}
+      <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/90 backdrop-blur md:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-4">
           {TABS.map((t) => (
             <button
               key={t.id}
-              onClick={() => {
-                setTab(t.id)
-                if (t.id === 'today' && tab === 'today') setDay(new Date())
-              }}
+              onClick={() => go(t.id)}
               className={`flex flex-col items-center gap-1 py-2 text-[11px] font-medium ${tab === t.id ? 'text-emerald-400' : 'text-slate-500'}`}
               aria-current={tab === t.id ? 'page' : undefined}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d={t.icon} />
-              </svg>
+              {navIcon(t.icon)}
               {t.label}
             </button>
           ))}

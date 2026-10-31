@@ -10,7 +10,7 @@ export function Goals({ onEdit, onNew }: { onEdit: (g: Goal) => void; onNew: () 
   const archived = goals.filter((g) => g.archived)
 
   const copyLink = async (g: Goal) => {
-    const url = `${location.origin}/?log=${g.id}&minutes=${g.step}`
+    const url = new URL(`?log=${g.id}&minutes=${g.step}`, location.origin + import.meta.env.BASE_URL).href
     try {
       await navigator.clipboard.writeText(url)
       notify('Quick-log link copied')
@@ -53,11 +53,11 @@ export function Goals({ onEdit, onNew }: { onEdit: (g: Goal) => void; onNew: () 
         </button>
       </header>
       {active.length === 0 && <p className="py-8 text-center text-slate-500">No active goals.</p>}
-      <ul className="space-y-2">{active.map((g, i) => row(g, i, active))}</ul>
+      <ul className="grid gap-2 lg:grid-cols-2">{active.map((g, i) => row(g, i, active))}</ul>
       {archived.length > 0 && (
         <details className="group">
           <summary className="cursor-pointer text-sm font-medium text-slate-500">Archived ({archived.length})</summary>
-          <ul className="mt-2 space-y-2 opacity-70">{archived.map((g, i) => row(g, i, archived))}</ul>
+          <ul className="mt-2 grid gap-2 opacity-70 lg:grid-cols-2">{archived.map((g, i) => row(g, i, archived))}</ul>
         </details>
       )}
     </div>

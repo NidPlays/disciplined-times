@@ -47,7 +47,7 @@ export function Today({ day, setDay, onEdit, onNew }: Props) {
 
   return (
     <div className="space-y-5">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between md:justify-center md:gap-8">
         <button onClick={() => setDay(addDays(day, -1))} className="rounded-full p-2 text-slate-400 hover:bg-slate-800" aria-label="Previous day">
           <Chevron dir="left" />
         </button>
@@ -61,7 +61,7 @@ export function Today({ day, setDay, onEdit, onNew }: Props) {
       </header>
 
       {items.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="grid grid-cols-3 gap-2 text-center md:gap-4">
           <Stat label="Logged" value={formatMinutes(doneToday)} />
           <Stat label="Planned" value={formatMinutes(planned)} />
           <Stat label="Goals done" value={`${completed}/${items.length}`} />
@@ -77,7 +77,7 @@ export function Today({ day, setDay, onEdit, onNew }: Props) {
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-3 lg:grid-cols-2">
           {items.map(({ goal, progress }) => (
             <GoalCard key={goal.id} goal={goal} progress={progress} quickSteps={settings.quickSteps} onLog={(m) => handleLog(goal, m)} onOpen={() => onEdit(goal)} />
           ))}

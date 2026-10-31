@@ -81,7 +81,12 @@ export function Settings() {
         </div>
       </section>
 
-      <p className="text-center text-xs text-slate-600">Disciplined Times v{__APP_VERSION__}</p>
+      <p className="text-center text-xs text-slate-600">
+        Disciplined Times v{__APP_VERSION__} ·{' '}
+        <a className="underline hover:text-slate-400" href="https://github.com/NidPlays/disciplined-times" target="_blank" rel="noreferrer">
+          Source on GitHub
+        </a>
+      </p>
     </div>
   )
 }

@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "bun test",
-    "icons": "pwa-assets-generator"
+    "icons": "pwa-assets-generator",
+    "build:pages": "BASE_PATH=/disciplined-times/ bun run build",
+    "preview:pages": "BASE_PATH=/disciplined-times/ vite preview"
   },
   "dependencies": {
     "date-fns": "^4.4.0",
