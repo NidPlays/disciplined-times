@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { exportData, isExportShape, useStore } from '../lib/store'
 import { useUi } from '../lib/ui'
+import { Appearance } from './Appearance'
 import { InstallCard } from './Install'
 
 export function Settings() {
@@ -29,19 +30,21 @@ export function Settings() {
     }
   }
 
-  const card = 'rounded-3xl border border-slate-800 bg-slate-900 p-4 space-y-4'
-  const seg = (on: boolean) => `rounded-xl px-3 py-1.5 text-sm font-semibold ${on ? 'bg-slate-700 text-white' : 'text-slate-400'}`
+  const card = 'rounded-3xl border border-n-800 bg-n-900 p-4 space-y-4'
+  const seg = (on: boolean) => `rounded-xl px-3 py-1.5 text-sm font-semibold ${on ? 'bg-n-700 text-n-100' : 'text-n-400'}`
 
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold">Settings</h1>
+
+      <Appearance />
 
       <InstallCard />
 
       <section className={card}>
         <div className="flex items-center justify-between">
           <span className="font-medium">Week starts on</span>
-          <div className="flex gap-1 rounded-2xl bg-slate-950 p-1">
+          <div className="flex gap-1 rounded-2xl bg-n-950 p-1">
             <button className={seg(settings.weekStartsOn === 1)} onClick={() => updateSettings({ weekStartsOn: 1 })}>
               Monday
             </button>
@@ -55,15 +58,15 @@ export function Settings() {
       <section className={card}>
         <div>
           <div className="font-medium">Your data</div>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-n-400">
             Everything is stored on this device only ({goals.length} goals, {logs.length} log entries). Export a backup to move between devices.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={doExport} className="rounded-2xl bg-slate-800 px-4 py-2 text-sm font-semibold hover:bg-slate-700">
+          <button onClick={doExport} className="rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
             Export backup
           </button>
-          <button onClick={() => fileRef.current?.click()} className="rounded-2xl bg-slate-800 px-4 py-2 text-sm font-semibold hover:bg-slate-700">
+          <button onClick={() => fileRef.current?.click()} className="rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
             Import backup
           </button>
           <button
@@ -73,7 +76,7 @@ export function Settings() {
                 notify('All data cleared')
               }
             }}
-            className="rounded-2xl px-4 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/10"
+            className="rounded-2xl px-4 py-2 text-sm font-semibold text-danger hover:bg-danger/10"
           >
             Clear all
           </button>
@@ -81,9 +84,9 @@ export function Settings() {
         </div>
       </section>
 
-      <p className="text-center text-xs text-slate-600">
+      <p className="text-center text-xs text-n-600">
         Disciplined Times v{__APP_VERSION__} ·{' '}
-        <a className="underline hover:text-slate-400" href="https://github.com/NidPlays/disciplined-times" target="_blank" rel="noreferrer">
+        <a className="underline hover:text-n-400" href="https://github.com/NidPlays/disciplined-times" target="_blank" rel="noreferrer">
           Source on GitHub
         </a>
       </p>

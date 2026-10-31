@@ -48,14 +48,14 @@ export function Today({ day, setDay, onEdit, onNew }: Props) {
   return (
     <div className="space-y-5">
       <header className="flex items-center justify-between md:justify-center md:gap-8">
-        <button onClick={() => setDay(addDays(day, -1))} className="rounded-full p-2 text-slate-400 hover:bg-slate-800" aria-label="Previous day">
+        <button onClick={() => setDay(addDays(day, -1))} className="rounded-full p-2 text-n-400 hover:bg-n-800" aria-label="Previous day">
           <Chevron dir="left" />
         </button>
         <button onClick={() => setDay(new Date())} className="text-center">
           <div className="text-2xl font-bold">{dayLabel(day)}</div>
-          <div className="text-sm text-slate-400">{format(day, 'EEE, d MMM yyyy')}</div>
+          <div className="text-sm text-n-400">{format(day, 'EEE, d MMM yyyy')}</div>
         </button>
-        <button onClick={() => setDay(addDays(day, 1))} className="rounded-full p-2 text-slate-400 hover:bg-slate-800" aria-label="Next day">
+        <button onClick={() => setDay(addDays(day, 1))} className="rounded-full p-2 text-n-400 hover:bg-n-800" aria-label="Next day">
           <Chevron dir="right" />
         </button>
       </header>
@@ -69,10 +69,10 @@ export function Today({ day, setDay, onEdit, onNew }: Props) {
       )}
 
       {items.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-700 p-8 text-center">
+        <div className="rounded-3xl border border-dashed border-n-700 p-8 text-center">
           <div className="mb-2 text-4xl">🌤️</div>
-          <p className="mb-4 text-slate-400">{goals.length === 0 ? 'No goals yet. Create one to start planning your hours.' : 'Nothing scheduled for this day.'}</p>
-          <button onClick={onNew} className="rounded-2xl bg-emerald-500 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-400">
+          <p className="mb-4 text-n-400">{goals.length === 0 ? 'No goals yet. Create one to start planning your hours.' : 'Nothing scheduled for this day.'}</p>
+          <button onClick={onNew} className="rounded-2xl bg-accent px-5 py-3 font-semibold text-on-accent hover:bg-accent-hover">
             Create a goal
           </button>
         </div>
@@ -85,7 +85,7 @@ export function Today({ day, setDay, onEdit, onNew }: Props) {
       )}
 
       {hidden.length > 0 && items.length > 0 && (
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-n-500">
           Not scheduled today: {hidden.map((g) => `${g.emoji} ${g.name}`).join(', ')}
         </p>
       )}
@@ -95,9 +95,9 @@ export function Today({ day, setDay, onEdit, onNew }: Props) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-slate-900 px-2 py-3">
+    <div className="rounded-2xl bg-n-900 px-2 py-3">
       <div className="text-lg font-bold tabular-nums">{value}</div>
-      <div className="text-[11px] uppercase tracking-wider text-slate-500">{label}</div>
+      <div className="text-[11px] uppercase tracking-wider text-n-500">{label}</div>
     </div>
   )
 }

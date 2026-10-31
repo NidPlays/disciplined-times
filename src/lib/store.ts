@@ -30,7 +30,7 @@ export interface ExportShape {
   settings: Settings
 }
 
-const defaultSettings: Settings = { weekStartsOn: 1, quickSteps: [15, 30, 60] }
+const defaultSettings: Settings = { weekStartsOn: 1, quickSteps: [15, 30, 60], theme: 'midnight', colorMode: 'system' }
 
 export const useStore = create<State>()(
   persist(
@@ -69,6 +69,11 @@ export const useStore = create<State>()(
       version: 1,
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ goals: s.goals, logs: s.logs, settings: s.settings }),
+      // Fill in settings added after the data was first saved (e.g. theme).
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<State>
+        return { ...current, ...p, settings: { ...defaultSettings, ...p.settings } }
+      },
     },
   ),
 )

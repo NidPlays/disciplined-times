@@ -2,6 +2,27 @@
 
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Semantic colour tokens. Defaults are Midnight (dark); src/lib/themes.ts
+     overrides them on <html> at runtime for the selected theme and mode. */
+  --color-n-950: #020617;
+  --color-n-900: #0f172a;
+  --color-n-800: #1e293b;
+  --color-n-700: #334155;
+  --color-n-600: #475569;
+  --color-n-500: #64748b;
+  --color-n-400: #94a3b8;
+  --color-n-300: #cbd5e1;
+  --color-n-200: #e2e8f0;
+  --color-n-100: #f1f5f9;
+  --color-accent: #10b981;
+  --color-accent-hover: #34d399;
+  --color-accent-fg: #34d399;
+  --color-on-accent: #022c22;
+  --color-danger: #f87171;
+  --color-success: #34d399;
+  /* Text on top of a goal's own colour: goal colours are always bright. */
+  --color-on-goal: #0f172a;
 }
 
 :root {
@@ -16,8 +37,9 @@ body,
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 antialiased;
+  @apply bg-n-950 text-n-100 antialiased;
   overscroll-behavior-y: none;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 .pt-safe { padding-top: max(env(safe-area-inset-top), 0.75rem); }

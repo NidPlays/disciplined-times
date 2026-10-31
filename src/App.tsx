@@ -10,6 +10,7 @@ import { UpdatePrompt } from './components/UpdatePrompt'
 import { Week } from './components/Week'
 import { formatMinutes, toKey } from './lib/schedule'
 import { useStore } from './lib/store'
+import { applyTheme } from './lib/themes'
 import type { Goal } from './lib/types'
 import { haptic, useUi } from './lib/ui'
 
@@ -83,6 +84,18 @@ export default function App() {
     history.replaceState(null, '', location.pathname + location.hash)
   }, [openNew])
 
+  // Apply the theme whenever it changes, and follow the OS setting in "system" mode.
+  const theme = useStore((s) => s.settings.theme)
+  const colorMode = useStore((s) => s.settings.colorMode)
+  useEffect(() => {
+    applyTheme(theme, colorMode)
+    if (colorMode !== 'system') return
+    const mq = window.matchMedia('(prefers-color-scheme: light)')
+    const onChange = () => applyTheme(theme, colorMode)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [theme, colorMode])
+
   // Roll over to the new day if the app was left open past midnight.
   useEffect(() => {
     const onVisible = () => {
@@ -129,7 +142,7 @@ export default function App() {
       <UpdatePrompt />
 
       {/* Desktop / tablet sidebar */}
-      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 border-r border-slate-800 bg-slate-950 p-4 md:flex lg:w-64">
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 border-r border-n-800 bg-n-950 p-4 md:flex lg:w-64">
         <a href={import.meta.env.BASE_URL} className="mb-6 flex items-center gap-3 px-2 py-1" onClick={(e) => (e.preventDefault(), go('today'))}>
           <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="h-9 w-9" />
           <span className="text-lg font-bold leading-tight">Disciplined Times</span>
@@ -139,17 +152,17 @@ export default function App() {
             key={t.id}
             onClick={() => go(t.id)}
             aria-current={tab === t.id ? 'page' : undefined}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${tab === t.id ? 'bg-slate-800 text-emerald-400' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${tab === t.id ? 'bg-n-800 text-accent-fg' : 'text-n-400 hover:bg-n-900 hover:text-n-200'}`}
           >
             {navIcon(t.icon)}
             <span className="flex-1 text-left">{t.label}</span>
-            <kbd className="text-[10px] text-slate-600">{i + 1}</kbd>
+            <kbd className="text-[10px] text-n-600">{i + 1}</kbd>
           </button>
         ))}
-        <button onClick={openNew} className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-2.5 text-sm font-semibold text-slate-950 hover:bg-emerald-400">
+        <button onClick={openNew} className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-accent px-3 py-2.5 text-sm font-semibold text-on-accent hover:bg-accent-hover">
           + New goal <kbd className="text-[10px] opacity-60">N</kbd>
         </button>
-        <p className="mt-auto px-2 text-xs leading-relaxed text-slate-600">
+        <p className="mt-auto px-2 text-xs leading-relaxed text-n-600">
           Shortcuts: <kbd>N</kbd> new goal · <kbd>1–4</kbd> tabs · <kbd>←</kbd>/<kbd>→</kbd> day · <kbd>T</kbd> today
         </p>
       </aside>
@@ -173,7 +186,7 @@ export default function App() {
       {tab === 'today' && (
         <button
           onClick={openNew}
-          className="fixed bottom-24 right-4 z-30 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500 text-3xl font-light text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 md:hidden"
+          className="fixed bottom-24 right-4 z-30 grid h-14 w-14 place-items-center rounded-2xl bg-accent text-3xl font-light text-on-accent shadow-lg shadow-accent/20 hover:bg-accent-hover md:hidden"
           aria-label="New goal"
         >
           +
@@ -181,13 +194,13 @@ export default function App() {
       )}
 
       {/* Phone bottom navigation */}
-      <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/90 backdrop-blur md:hidden">
+      <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-n-800 bg-n-950/90 backdrop-blur md:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-4">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => go(t.id)}
-              className={`flex flex-col items-center gap-1 py-2 text-[11px] font-medium ${tab === t.id ? 'text-emerald-400' : 'text-slate-500'}`}
+              className={`flex flex-col items-center gap-1 py-2 text-[11px] font-medium ${tab === t.id ? 'text-accent-fg' : 'text-n-500'}`}
               aria-current={tab === t.id ? 'page' : undefined}
             >
               {navIcon(t.icon)}

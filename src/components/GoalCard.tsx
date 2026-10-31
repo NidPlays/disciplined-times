@@ -31,7 +31,7 @@ export function GoalCard({ goal, progress: p, quickSteps, onLog, onOpen }: Props
   }
 
   return (
-    <div className="rounded-3xl border border-slate-800 bg-slate-900 p-4">
+    <div className="rounded-3xl border border-n-800 bg-n-900 p-4">
       <div className="flex items-center gap-4">
         <button onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-4 text-left" aria-label={`Edit ${goal.name}`}>
           <Ring ratio={p.ratio} color={goal.color}>
@@ -39,8 +39,8 @@ export function GoalCard({ goal, progress: p, quickSteps, onLog, onOpen }: Props
           </Ring>
           <div className="min-w-0">
             <div className="truncate font-semibold">{goal.name}</div>
-            <div className={`text-sm ${done ? 'text-emerald-400' : 'text-slate-400'}`}>{subtitle}</div>
-            {goal.period !== 'day' && p.doneToday > 0 && <div className="text-xs text-slate-500">{formatMinutes(p.doneToday)} today</div>}
+            <div className={`text-sm ${done ? 'text-success' : 'text-n-400'}`}>{subtitle}</div>
+            {goal.period !== 'day' && p.doneToday > 0 && <div className="text-xs text-n-500">{formatMinutes(p.doneToday)} today</div>}
           </div>
         </button>
         <button
@@ -50,7 +50,7 @@ export function GoalCard({ goal, progress: p, quickSteps, onLog, onOpen }: Props
             e.preventDefault()
             setMore((m) => !m)
           }}
-          className={`${bump ? 'animate-pop' : ''} flex h-14 min-w-14 shrink-0 flex-col items-center justify-center rounded-2xl px-3 font-bold text-slate-950 active:brightness-90`}
+          className={`${bump ? 'animate-pop' : ''} flex h-14 min-w-14 shrink-0 flex-col items-center justify-center rounded-2xl px-3 font-bold text-on-goal active:brightness-90`}
           style={{ background: goal.color }}
           aria-label={`Add ${formatMinutes(goal.step)} to ${goal.name}`}
         >
@@ -59,7 +59,7 @@ export function GoalCard({ goal, progress: p, quickSteps, onLog, onOpen }: Props
         </button>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <button onClick={() => setMore((m) => !m)} className="text-xs font-medium text-slate-500 hover:text-slate-300" aria-expanded={more}>
+        <button onClick={() => setMore((m) => !m)} className="text-xs font-medium text-n-500 hover:text-n-300" aria-expanded={more}>
           {more ? 'Less' : 'Other amount'}
         </button>
         {more && (
@@ -69,7 +69,7 @@ export function GoalCard({ goal, progress: p, quickSteps, onLog, onOpen }: Props
                 key={m}
                 onClick={() => log(m)}
                 disabled={m < 0 && p.doneToday <= 0}
-                className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-200 hover:bg-slate-700 disabled:opacity-30"
+                className="rounded-full bg-n-800 px-3 py-1 text-xs font-semibold text-n-200 hover:bg-n-700 disabled:opacity-30"
               >
                 {m > 0 ? '+' : ''}
                 {formatMinutes(m)}

@@ -13,7 +13,7 @@ export function Ring({ ratio, color, size = 56, stroke = 6, children }: Props) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={stroke} className="text-slate-800" />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={stroke} className="text-n-800" />
         <circle
           cx={size / 2}
           cy={size / 2}

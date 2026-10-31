@@ -36,4 +36,7 @@ export interface LogEntry {
 export interface Settings {
   weekStartsOn: 0 | 1
   quickSteps: number[]
+  /** Theme id from src/lib/themes.ts. */
+  theme: string
+  colorMode: 'system' | 'light' | 'dark'
 }

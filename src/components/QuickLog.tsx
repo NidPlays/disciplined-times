@@ -14,7 +14,7 @@ export function QuickLog({ open, minutes, onClose }: { open: boolean; minutes: n
   return (
     <Sheet open={open} onClose={onClose} title={`Add ${formatMinutes(minutes)} to…`}>
       {list.length === 0 ? (
-        <p className="py-6 text-center text-slate-400">No goals scheduled today.</p>
+        <p className="py-6 text-center text-n-400">No goals scheduled today.</p>
       ) : (
         <ul className="space-y-2">
           {list.map((g) => {
@@ -28,13 +28,13 @@ export function QuickLog({ open, minutes, onClose }: { open: boolean; minutes: n
                     notify(`+${formatMinutes(minutes)} · ${g.name}`, { label: 'Undo', run: () => removeLog(e.id) })
                     onClose()
                   }}
-                  className="flex w-full items-center gap-3 rounded-2xl bg-slate-800 p-3 text-left hover:bg-slate-700"
+                  className="flex w-full items-center gap-3 rounded-2xl bg-n-800 p-3 text-left hover:bg-n-700"
                 >
                   <Ring ratio={p.ratio} color={g.color} size={44} stroke={5}>
                     <span className="text-base">{g.emoji}</span>
                   </Ring>
                   <span className="flex-1 font-medium">{g.name}</span>
-                  <span className="text-sm text-slate-400">{formatMinutes(p.remaining)} left</span>
+                  <span className="text-sm text-n-400">{formatMinutes(p.remaining)} left</span>
                 </button>
               </li>
             )

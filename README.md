@@ -10,6 +10,7 @@ A website for planning **hours per goal** and logging time in quick taps. It wor
 - Tap the big **+30** button to log time. The step size is set per goal. Other amounts and corrections are one tap away, and every log can be undone.
 - A **Week** view shows a bar chart of logged time against the plan, plus a per-goal heat strip.
 - **Works as a normal website.** On desktop it has a sidebar, a multi-column layout and keyboard shortcuts (`N` new goal, `1`–`4` switch tabs, `←`/`→` change day, `T` today). Tabs live in the URL hash (`#week`, `#goals`), so browser back/forward and bookmarks work.
+- **Themes:** Midnight, Ocean, Forest, Sunset, Rose, Grape and Mono. Each has a dark and a light version, and you can choose Light, Dark or follow the device (System) under Settings → Appearance.
 - **Installs as an app** on iOS, Android and desktop, and works offline. All data stays on the device, with JSON export and import for backups.
 
 ![Desktop](docs/desktop.png)
@@ -17,6 +18,10 @@ A website for planning **hours per goal** and logging time in quick taps. It wor
 | Today | New goal | Week |
 | --- | --- | --- |
 | ![Today](docs/today.png) | ![Editor](docs/editor.png) | ![Week](docs/week.png) |
+
+| Themes (dark) | Themes (light) |
+| --- | --- |
+| ![Themes dark](docs/themes-dark.png) | ![Themes light](docs/themes-light.png) |
 
 ## Stack
 
@@ -83,6 +88,16 @@ LogEntry { id, goalId, minutes, date: 'yyyy-MM-dd', at }
 ```
 
 Scheduling and progress logic lives in `src/lib/schedule.ts` and is covered by `src/lib/schedule.test.ts`.
+
+## Theming
+
+Components use semantic Tailwind tokens instead of fixed colours:
+
+- `n-950` … `n-100`: neutral scale, from page background to main text
+- `accent`, `accent-hover`, `accent-fg`, `on-accent`: accent colour and its variants
+- `success`, `danger`: status colours
+
+`src/lib/themes.ts` maps each theme and mode onto those CSS variables. In light mode the neutral scale is inverted, with white cards on a tinted page. To add a theme, add an entry to `THEMES`. `src/lib/themes.test.ts` checks that every theme meets WCAG contrast in both modes.
 
 ## License
 

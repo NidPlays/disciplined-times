@@ -82,9 +82,9 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
     onDone()
   }
 
-  const label = 'mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-400'
+  const label = 'mb-2 block text-xs font-semibold uppercase tracking-wider text-n-400'
   const chip = (on: boolean) =>
-    `rounded-full px-3 py-1.5 text-sm font-medium transition ${on ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`
+    `rounded-full px-3 py-1.5 text-sm font-medium transition ${on ? 'bg-accent text-on-accent' : 'bg-n-800 text-n-300 hover:bg-n-700'}`
 
   return (
     <form onSubmit={save} className="space-y-6">
@@ -98,7 +98,7 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
           onChange={(e) => set('name', e.target.value)}
           placeholder="e.g. Deep work, Guitar, Reading"
           maxLength={60}
-          className="min-w-0 flex-1 rounded-2xl border border-slate-700 bg-slate-950 px-4 text-base outline-none focus:border-emerald-500"
+          className="min-w-0 flex-1 rounded-2xl border border-n-700 bg-n-950 px-4 text-base outline-none focus:border-accent"
         />
       </div>
 
@@ -106,7 +106,7 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
         <span className={label}>Icon & colour</span>
         <div className="flex flex-wrap gap-1.5">
           {EMOJIS.map((e) => (
-            <button type="button" key={e} onClick={() => set('emoji', e)} className={`grid h-10 w-10 place-items-center rounded-xl text-xl ${d.emoji === e ? 'bg-slate-700 ring-2 ring-emerald-500' : 'bg-slate-800'}`}>
+            <button type="button" key={e} onClick={() => set('emoji', e)} className={`grid h-10 w-10 place-items-center rounded-xl text-xl ${d.emoji === e ? 'bg-n-700 ring-2 ring-accent' : 'bg-n-800'}`}>
               {e}
             </button>
           ))}
@@ -118,7 +118,7 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
               key={c}
               aria-label={`Colour ${c}`}
               onClick={() => set('color', c)}
-              className={`h-8 w-8 rounded-full ${d.color === c ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
+              className={`h-8 w-8 rounded-full ${d.color === c ? 'ring-2 ring-n-100 ring-offset-2 ring-offset-n-900' : ''}`}
               style={{ background: c }}
             />
           ))}
@@ -127,9 +127,9 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
 
       <div>
         <span className={label}>Plan time per</span>
-        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-950 p-1">
+        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-n-950 p-1">
           {(['day', 'week', 'month'] as Period[]).map((p) => (
-            <button type="button" key={p} onClick={() => set('period', p)} className={`rounded-xl py-2 text-sm font-semibold capitalize ${d.period === p ? 'bg-slate-700 text-white' : 'text-slate-400'}`}>
+            <button type="button" key={p} onClick={() => set('period', p)} className={`rounded-xl py-2 text-sm font-semibold capitalize ${d.period === p ? 'bg-n-700 text-n-100' : 'text-n-400'}`}>
               {p}
             </button>
           ))}
@@ -160,7 +160,7 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
                     onClick={() => toggleDay(w)}
                     aria-pressed={on}
                     aria-label={WEEKDAY_SHORT[w]}
-                    className={`h-10 flex-1 rounded-xl text-sm font-bold ${on ? 'text-slate-950' : 'bg-slate-800 text-slate-400'}`}
+                    className={`h-10 flex-1 rounded-xl text-sm font-bold ${on ? 'text-on-goal' : 'bg-n-800 text-n-400'}`}
                     style={on ? { background: d.color } : undefined}
                   >
                     {WEEKDAY_LETTER[w]}
@@ -171,14 +171,14 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
           </div>
 
           {active.length > 0 && (
-            <div className="rounded-2xl bg-slate-950 p-4">
+            <div className="rounded-2xl bg-n-950 p-4">
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-sm font-medium">Hours per day</span>
-                <label className="flex items-center gap-2 text-sm text-slate-400">
+                <label className="flex items-center gap-2 text-sm text-n-400">
                   <input type="checkbox" checked={perDay} onChange={(e) => {
                     setPerDay(e.target.checked)
                     if (!e.target.checked) setAll(firstValue)
-                  }} className="accent-emerald-500" />
+                  }} className="accent-accent" />
                   Different per day
                 </label>
               </div>
@@ -186,23 +186,23 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
                 <div className="space-y-2">
                   {active.map((w) => (
                     <div key={w} className="flex items-center justify-between">
-                      <span className="text-sm text-slate-300">{WEEKDAY_SHORT[w]}</span>
+                      <span className="text-sm text-n-300">{WEEKDAY_SHORT[w]}</span>
                       <Stepper value={d.dayTargets[w] ?? 0} onChange={(v) => setOne(w, v)} max={24 * 60} />
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">Each day</span>
+                  <span className="text-sm text-n-300">Each day</span>
                   <Stepper value={firstValue} min={15} step={15} onChange={setAll} max={24 * 60} />
                 </div>
               )}
-              <p className="mt-3 text-xs text-slate-500">≈ {formatMinutes(weeklyPlan({ ...d } as Goal))} per week</p>
+              <p className="mt-3 text-xs text-n-500">≈ {formatMinutes(weeklyPlan({ ...d } as Goal))} per week</p>
             </div>
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-2xl bg-slate-950 p-4">
+        <div className="flex items-center justify-between rounded-2xl bg-n-950 p-4">
           <span className="text-sm font-medium">Total per {d.period}</span>
           <Stepper value={d.periodTarget} min={30} step={d.period === 'week' ? 30 : 60} onChange={(v) => set('periodTarget', v)} />
         </div>
@@ -211,12 +211,12 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
       <div className="flex items-center justify-between">
         <div>
           <span className="block text-sm font-medium">Tap to log</span>
-          <span className="text-xs text-slate-500">Amount the big + button adds</span>
+          <span className="text-xs text-n-500">Amount the big + button adds</span>
         </div>
         <Stepper value={d.step} min={5} step={5} max={240} onChange={(v) => set('step', v)} />
       </div>
 
-      <p className="text-center text-sm text-slate-500">{valid ? describeSchedule({ ...d } as Goal, settings.weekStartsOn) : 'Add a name and a schedule'}</p>
+      <p className="text-center text-sm text-n-500">{valid ? describeSchedule({ ...d } as Goal, settings.weekStartsOn) : 'Add a name and a schedule'}</p>
 
       <div className="flex gap-3">
         {goal && (
@@ -229,12 +229,12 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
                 onDone()
               }
             }}
-            className="rounded-2xl px-4 py-3 font-semibold text-red-400 hover:bg-red-500/10"
+            className="rounded-2xl px-4 py-3 font-semibold text-danger hover:bg-danger/10"
           >
             Delete
           </button>
         )}
-        <button type="submit" disabled={!valid} className="flex-1 rounded-2xl bg-emerald-500 py-3 font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-40">
+        <button type="submit" disabled={!valid} className="flex-1 rounded-2xl bg-accent py-3 font-semibold text-on-accent hover:bg-accent-hover disabled:opacity-40">
           {goal ? 'Save' : 'Create goal'}
         </button>
       </div>
