@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="Plan hours for your goals per day, week or month, and log time in 30-minute taps." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Disciplined" />
+    <link rel="icon" href="%BASE_URL%favicon.ico" sizes="48x48" />
+    <link rel="icon" href="%BASE_URL%logo.svg" sizes="any" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon-180x180.png" />
+    <title>Disciplined Times</title>
+    <script>
+      // Paint the saved theme's background before the app loads (avoids a flash).
+      try {
+        var b = JSON.parse(localStorage.getItem('dt-boot') || 'null')
+        if (b) {
+          document.documentElement.style.background = b.bg
+          document.documentElement.style.colorScheme = b.scheme
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', b.bg)
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
