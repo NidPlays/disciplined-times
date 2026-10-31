@@ -1,5 +1,5 @@
 import { addDays, addWeeks, format, isToday, startOfWeek } from 'date-fns'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { formatMinutes, isScheduledOn, minutesBetween, targetFor, toKey, weeklyPlan } from '../lib/schedule'
 import { useStore } from '../lib/store'
 import { Chevron } from './Today'
@@ -27,6 +27,34 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
   const totalDone = perDay.reduce((s, x) => s + x.done, 0)
   const totalPlan = active.reduce((s, g) => s + weeklyPlan(g), 0)
 
+  // Horizontal swipe on the chart: swipe left → next week, swipe right → previous week.
+  const touch = useRef<{ x: number; y: number } | null>(null)
+  const swiped = useRef(false)
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0]
+    touch.current = { x: t.clientX, y: t.clientY }
+    swiped.current = false
+  }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const s = touch.current
+    touch.current = null
+    if (!s) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - s.x
+    const dy = t.clientY - s.y
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    swiped.current = true
+    setAnchor((a) => addWeeks(a, dx < 0 ? 1 : -1))
+  }
+  // Swallow the tap that would otherwise open a day after a swipe ends on a bar.
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (swiped.current) {
+      swiped.current = false
+      e.stopPropagation()
+      e.preventDefault()
+    }
+  }
+
   return (
     <div className="space-y-5">
       <header className="flex items-center justify-between md:justify-center md:gap-8">
@@ -45,7 +73,13 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
       </header>
 
       <div className="space-y-5 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start lg:gap-6 lg:space-y-0">
-      <section className="rounded-3xl border border-n-800 bg-n-900 p-4 lg:sticky lg:top-8">
+      <section
+        className="touch-pan-y select-none rounded-3xl border border-n-800 bg-n-900 p-4 lg:sticky lg:top-8"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={() => (touch.current = null)}
+        onClickCapture={onClickCapture}
+      >
         <div className="mb-4 flex items-baseline justify-between">
           <span className="text-sm text-n-400">Logged this week</span>
           <span className="font-semibold tabular-nums">
@@ -63,7 +97,7 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
             </button>
           ))}
         </div>
-        <p className="mt-3 text-xs text-n-500">Dashed outline = daily-goal plan. Tap a day to open it.</p>
+        <p className="mt-3 text-xs text-n-500">Dashed outline = daily-goal plan. Tap a day to open it, swipe to change week.</p>
       </section>
 
       <section className="space-y-2">
