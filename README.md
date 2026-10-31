@@ -49,7 +49,12 @@ bun run build:pages && bun run preview:pages   # test the GitHub Pages build at 
 
 ### GitHub Pages (current)
 
-`.github/workflows/deploy.yml` tests and builds on every push and PR, and deploys pushes to `main`.
+`.github/workflows/deploy.yml` runs tests and a build on every push and pull request. It deploys only on pushes to `main` of `NidPlays/disciplined-times`:
+
+- **Pull requests, including from forks, never deploy.** They don't touch Pages at all and run with read-only permissions.
+- **Forks never deploy,** even from their own `main`.
+- **Only the deploy job gets Pages permissions** (`pages: write`, `id-token: write`).
+- **Production deploys aren't cancelled by later pushes.** Superseded PR runs are.
 
 One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
