@@ -1,14 +1,16 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { exportData, isExportShape, useStore } from '../lib/store'
 import { useUi } from '../lib/ui'
 import { externalHref } from '../lib/links'
 import { Appearance } from './Appearance'
+import { Changelog } from './Changelog'
 import { InstallCard, isStandalone } from './Install'
 
 export function Settings() {
   const { settings, updateSettings, importData, reset, goals, logs } = useStore()
   const notify = useUi((s) => s.notify)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [changelogOpen, setChangelogOpen] = useState(false)
 
   const doExport = () => {
     const blob = new Blob([JSON.stringify(exportData(), null, 2)], { type: 'application/json' })
@@ -85,8 +87,20 @@ export function Settings() {
         </div>
       </section>
 
+      <section className={card}>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="font-medium">Disciplined Times</div>
+            <p className="text-sm text-n-400">Version {__APP_VERSION__}</p>
+          </div>
+          <button onClick={() => setChangelogOpen(true)} className="shrink-0 rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
+            View changelog
+          </button>
+        </div>
+      </section>
+      <Changelog open={changelogOpen} onClose={() => setChangelogOpen(false)} />
+
       <p className="text-center text-xs text-n-500">
-        Disciplined Times v{__APP_VERSION__} ·{' '}
         <a className="underline hover:text-n-400" href={externalHref('https://github.com/NidPlays/disciplined-times', undefined, isStandalone())} target="_blank" rel="noopener noreferrer">
           Source on GitHub
         </a>
