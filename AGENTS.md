@@ -25,6 +25,7 @@ src/
     themes.ts        themes + WCAG contrast enforcement (tested in themes.test.ts)
     store.ts         persisted Zustand store, export/import
     types.ts         Goal, LogEntry, Settings
+    changelog.ts     parses CHANGELOG.md for the in-app changelog (tested in changelog.test.ts)
     links.ts         external-link handling for the installed app (tested in links.test.ts)
     ui.ts            toast + haptics
 public/              static assets and icons (regenerate PNGs with `bun run icons`)
@@ -63,7 +64,7 @@ Rules:
 - Reset the lower numbers when bumping a higher one (`0.2.3` → `0.3.0`, `0.9.1` → `1.0.0`).
 - While the version is `0.y.z`, treat breaking changes as a **MINOR** bump and call them out clearly in the changelog. `1.0.0` is a deliberate decision by the maintainer, not something an agent does on its own.
 - If several PRs are open at once, bump relative to whatever is on `main` when you open or update yours. Resolve version conflicts by re-bumping from `main`, never by going backwards.
-- Add an entry to **`CHANGELOG.md`** under the new version (newest first) describing the user-visible change in plain language.
+- Add an entry to **`CHANGELOG.md`** under the new version (newest first) describing the user-visible change in plain language. The app shows this file under Settings → View changelog, so write for users, and stick to `## <version>` headings and `- ` bullets (`**bold**` and `` `code` `` are rendered). A test checks that the top entry matches `package.json`.
 - State the bump in the PR description, e.g. "Version: 0.1.0 → 0.2.0 (minor: new swipe gesture)".
 - Don't create git tags or GitHub releases unless asked.
 
