@@ -22,8 +22,9 @@ const chevron = (d: string) => (
 /**
  * One notification banner at the top of the screen for every app-level notice
  * (update available, install as app…). When several are active they stack like a
- * deck: one card is shown at a time and the others peek out underneath. Swipe the card
- * up/down, use the arrows, scroll the wheel over it, or press ↑/↓ to switch.
+ * deck: one card is shown at a time and the next one peeks out underneath with its title.
+ * Swipe the card up/down or tap the peeking card to switch; on wider screens there are
+ * also ▲/▼ arrows, and the mouse wheel and ↑/↓ keys work too.
  */
 export function Notices() {
   // Order = priority: an available update comes before the install suggestion.
@@ -43,6 +44,7 @@ export function Notices() {
   const count = notices.length
   const index = Math.max(0, notices.findIndex((n) => n.id === activeId))
   const current = notices[index]
+  const next = count > 1 ? notices[(index + 1) % count] : null
 
   // step 1 = next card (comes up from below), -1 = previous (drops in from above). Wraps around.
   const go = (step: 1 | -1) => {
@@ -85,9 +87,20 @@ export function Notices() {
           go(e.deltaY > 0 ? 1 : -1)
         }}
       >
-        {/* The other cards peeking out below, so it's obvious there's more than one. */}
-        {count > 2 && <div className="absolute inset-x-6 -bottom-3 h-6 rounded-b-2xl border border-n-700 bg-n-800/50" aria-hidden />}
-        {count > 1 && <div className="absolute inset-x-3 -bottom-1.5 h-6 rounded-b-2xl border border-n-700 bg-n-800/80 shadow-lg" aria-hidden />}
+        {/* The next card peeks out below with its title, so it's clear another notification is
+            waiting. Tap it (or swipe the card up) to bring it forward. */}
+        {count > 2 && <div className="absolute inset-x-6 -bottom-8 h-10 rounded-b-2xl border border-t-0 border-n-700 bg-n-800/50" aria-hidden />}
+        {next && (
+          <button
+            key={`peek-${next.id}`}
+            onClick={() => go(1)}
+            aria-label={`Show next notification: ${next.title}`}
+            className="animate-fade absolute inset-x-3 -bottom-6 flex h-10 items-end justify-center gap-1.5 rounded-b-2xl border border-t-0 border-n-700 bg-n-800/80 px-4 pb-1 text-xs text-n-400 shadow-lg backdrop-blur"
+          >
+            <span className="truncate">{next.title}</span>
+            {count > 2 && <span className="shrink-0 rounded-full bg-n-700 px-1.5 text-[10px] font-semibold text-n-300">+{count - 2}</span>}
+          </button>
+        )}
 
         <div
           key={current.id}
@@ -152,7 +165,7 @@ export function Notices() {
             </button>
           </div>
           {count > 1 && (
-            <div className="-my-1 -mr-1 flex shrink-0 flex-col items-center gap-0.5 border-l border-n-700 pl-1.5">
+            <div className="-my-1 -mr-1 hidden shrink-0 flex-col items-center gap-0.5 border-l border-n-700 pl-1.5 md:flex">
               <button onClick={() => go(-1)} className="grid h-6 w-6 place-items-center rounded-lg text-n-400 hover:text-n-200" aria-label="Previous notification">
                 {chevron('M6 15l6-6 6 6')}
               </button>
