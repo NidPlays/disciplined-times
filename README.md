@@ -97,7 +97,20 @@ Components use semantic Tailwind tokens instead of fixed colours:
 - `accent`, `accent-hover`, `accent-fg`, `on-accent`: accent colour and its variants
 - `success`, `danger`: status colours
 
-`src/lib/themes.ts` maps each theme and mode onto those CSS variables. In light mode the neutral scale is inverted, with white cards on a tinted page. To add a theme, add an entry to `THEMES`. `src/lib/themes.test.ts` checks that every theme meets WCAG contrast in both modes.
+`src/lib/themes.ts` maps each theme and mode onto those CSS variables. In light mode the neutral scale is inverted, with white cards on a tinted page. To add a theme, add an entry to `THEMES`.
+
+## Accessibility
+
+Text is designed to meet **WCAG 2.2 AA** in every theme, in both light and dark mode:
+
+- **Contrast is enforced.** When building a theme, `themeVars()` nudges each text colour towards the main text colour until it reaches its target against every surface it is drawn on (page, card, chip):
+  - primary and body text: ≥ 7:1 (AAA)
+  - secondary and caption text, accent text, success/danger: ≥ 4.5:1 (AA)
+  - outlines, rings and progress graphics: ≥ 3:1
+- **Tested.** `src/lib/themes.test.ts` checks every text/surface pair for every theme and mode (164 checks), plus labels on goal colours and on accent buttons.
+- **Readable sizes.** Nothing is smaller than 12px, and secondary text is never faded with opacity.
+- **Keyboard.** There's a visible focus ring on every control, keyboard shortcuts on desktop, and Esc closes dialogs.
+- **Motion.** Animations are turned off when the OS "reduce motion" setting is on.
 
 ## License
 

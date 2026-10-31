@@ -55,7 +55,7 @@ export function GoalCard({ goal, progress: p, quickSteps, onLog, onOpen }: Props
           aria-label={`Add ${formatMinutes(goal.step)} to ${goal.name}`}
         >
           <span className="text-lg leading-none">+{goal.step < 60 ? goal.step : goal.step / 60}</span>
-          <span className="text-[10px] uppercase leading-none opacity-70">{goal.step < 60 ? 'min' : goal.step === 60 ? 'hour' : 'hours'}</span>
+          <span className="text-xs font-semibold uppercase leading-none">{goal.step < 60 ? 'min' : goal.step === 60 ? 'hour' : 'hours'}</span>
         </button>
       </div>
       <div className="mt-3 flex items-center gap-2">

@@ -98,7 +98,7 @@ function GoalForm({ goal, onDone }: { goal: Goal | null; onDone: () => void }) {
           onChange={(e) => set('name', e.target.value)}
           placeholder="e.g. Deep work, Guitar, Reading"
           maxLength={60}
-          className="min-w-0 flex-1 rounded-2xl border border-n-700 bg-n-950 px-4 text-base outline-none focus:border-accent"
+          className="min-w-0 flex-1 rounded-2xl border border-n-700 bg-n-950 px-4 text-base text-n-100 outline-none placeholder:text-n-500 focus:border-accent focus:ring-2 focus:ring-accent/40"
         />
       </div>
 

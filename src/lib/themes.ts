@@ -13,6 +13,13 @@
  * The tokens are CSS variables, so switching themes only rewrites those variables.
  */
 
+/**
+ * Colours a goal can use. They stay the same in every theme so a goal is
+ * recognisable. They're all bright, so labels on them use `on-goal` (dark).
+ */
+export const GOAL_COLORS = ['#34d399', '#60a5fa', '#f472b6', '#fbbf24', '#a78bfa', '#f87171', '#22d3ee', '#a3e635']
+export const ON_GOAL = '#0f172a'
+
 type Scale = Record<50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950, string>
 
 const neutrals = {
@@ -117,6 +124,60 @@ function neutralSteps(s: Scale, mode: ResolvedMode): Record<(typeof STEPS)[numbe
   return { 950: s[100], 900: '#ffffff', 800: s[200], 700: s[300], 600: s[400], 500: s[500], 400: s[600], 300: s[700], 200: s[800], 100: s[900] }
 }
 
+// ---- WCAG contrast helpers -------------------------------------------------
+
+function luminance(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/** WCAG 2.x contrast ratio between two #rrggbb colours (1–21). */
+export function contrast(a: string, b: string) {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p)
+  return (x + 0.05) / (y + 0.05)
+}
+
+function mix(a: string, b: string, t: number) {
+  const ch = (h: string, i: number) => parseInt(h.slice(i, i + 2), 16)
+  return (
+    '#' +
+    [1, 3, 5]
+      .map((i) => Math.round(ch(a, i) + (ch(b, i) - ch(a, i)) * t).toString(16).padStart(2, '0'))
+      .join('')
+  )
+}
+
+/**
+ * Nudge `fg` towards `toward` (the strongest text colour) until it reaches
+ * `ratio` against every background in `bgs`. Leaves it untouched if it
+ * already passes, so palettes keep their character where possible.
+ */
+function ensureContrast(fg: string, bgs: string[], ratio: number, toward: string) {
+  for (let t = 0; t <= 1.0001; t += 0.02) {
+    const c = mix(fg, toward, t)
+    if (bgs.every((bg) => contrast(c, bg) >= ratio)) return c
+  }
+  return toward
+}
+
+/**
+ * Minimum contrast each token must reach against the surfaces it is drawn on
+ * (n-950 page, n-900 cards, n-800 chips / active items).
+ * 4.5:1 is WCAG AA for normal-size text; 3:1 is the minimum for non-text UI
+ * such as borders, progress tracks and focus rings (WCAG 1.4.11).
+ */
+const TEXT_RULES: [token: string, ratio: number][] = [
+  ['n-300', 7],
+  ['n-400', 4.5],
+  ['n-500', 4.5],
+  ['accent-fg', 4.5],
+  ['success', 4.5],
+  ['danger', 4.5],
+]
+
 export function themeVars(theme: Theme, mode: ResolvedMode): Record<string, string> {
   const n = neutralSteps(theme.neutral, mode)
   const a = theme[mode]
@@ -129,6 +190,17 @@ export function themeVars(theme: Theme, mode: ResolvedMode): Record<string, stri
     '--color-success': mode === 'dark' ? '#34d399' : '#047857',
   }
   for (const k of STEPS) vars[`--color-n-${k}`] = n[k]
+
+  const surfaces = [n[950], n[900], n[800]]
+  const strongest = mode === 'dark' ? '#ffffff' : '#000000'
+  for (const [token, ratio] of TEXT_RULES) {
+    const key = `--color-${token}`
+    vars[key] = ensureContrast(vars[key], surfaces, ratio, strongest)
+  }
+  // n-600 is only used for non-text graphics (dashed plan outlines): 3:1.
+  vars['--color-n-600'] = ensureContrast(n[600], [n[950], n[900]], 3, strongest)
+  // Accent as a UI colour (selection rings, progress bars) must stand out from cards.
+  vars['--color-accent'] = ensureContrast(a.accent, [n[900]], 3, strongest)
   return vars
 }
 

@@ -156,13 +156,13 @@ export default function App() {
           >
             {navIcon(t.icon)}
             <span className="flex-1 text-left">{t.label}</span>
-            <kbd className="text-[10px] text-n-600">{i + 1}</kbd>
+            <kbd className="text-xs text-n-500">{i + 1}</kbd>
           </button>
         ))}
         <button onClick={openNew} className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-accent px-3 py-2.5 text-sm font-semibold text-on-accent hover:bg-accent-hover">
-          + New goal <kbd className="text-[10px] opacity-60">N</kbd>
+          + New goal <kbd className="rounded border border-current/30 px-1 text-xs">N</kbd>
         </button>
-        <p className="mt-auto px-2 text-xs leading-relaxed text-n-600">
+        <p className="mt-auto px-2 text-xs leading-relaxed text-n-400">
           Shortcuts: <kbd>N</kbd> new goal · <kbd>1–4</kbd> tabs · <kbd>←</kbd>/<kbd>→</kbd> day · <kbd>T</kbd> today
         </p>
       </aside>
@@ -200,7 +200,7 @@ export default function App() {
             <button
               key={t.id}
               onClick={() => go(t.id)}
-              className={`flex flex-col items-center gap-1 py-2 text-[11px] font-medium ${tab === t.id ? 'text-accent-fg' : 'text-n-500'}`}
+              className={`flex flex-col items-center gap-1 py-2 text-xs font-medium ${tab === t.id ? 'text-accent-fg' : 'text-n-500'}`}
               aria-current={tab === t.id ? 'page' : undefined}
             >
               {navIcon(t.icon)}

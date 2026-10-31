@@ -57,7 +57,7 @@ export function Goals({ onEdit, onNew }: { onEdit: (g: Goal) => void; onNew: () 
       {archived.length > 0 && (
         <details className="group">
           <summary className="cursor-pointer text-sm font-medium text-n-500">Archived ({archived.length})</summary>
-          <ul className="mt-2 grid gap-2 opacity-70 lg:grid-cols-2">{archived.map((g, i) => row(g, i, archived))}</ul>
+          <ul className="mt-2 grid gap-2 lg:grid-cols-2">{archived.map((g, i) => row(g, i, archived))}</ul>
         </details>
       )}
     </div>

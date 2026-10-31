@@ -80,7 +80,7 @@ export function Week({ onPickDay }: { onPickDay: (d: Date) => void }) {
                 </span>
                 <span className="shrink-0 tabular-nums text-n-400">
                   {formatMinutes(done)} / {formatMinutes(plan)}
-                  {g.period === 'month' && <span className="text-n-600"> (≈wk)</span>}
+                  {g.period === 'month' && <span className="text-n-500"> (≈wk)</span>}
                 </span>
               </div>
               <div className="flex gap-1">
