@@ -2,6 +2,10 @@
 
 All notable changes to Disciplined Times. The project uses [Semantic Versioning](https://semver.org); see `AGENTS.md` for when to bump which number.
 
+## 0.6.1
+
+- New **promo video**: a 38-second narrated tour of planning, one-tap logging, the Week view and themes. It's linked at the top of the README, and its source (made with HyperFrames) is in `docs/video`. No changes to the app.
+
 ## 0.6.0
 
 - **Settings:** the welcome walkthrough now has its own **Walkthrough** card with a **Show walkthrough** button, so it's easy to find when you want to see the tour again.

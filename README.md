@@ -4,6 +4,10 @@ A website for planning **hours per goal** and logging time in quick taps. It wor
 
 **Live:** https://nidplays.github.io/disciplined-times/
 
+[![Disciplined Times promo: plan hours per goal, log time with one tap, see your week, pick a theme](docs/video/output/preview.gif)](docs/video/output/disciplined-times.mp4)
+
+▶️ **[Watch the full video with narration and sound](docs/video/output/disciplined-times.mp4)** (MP4, 38 s). Made with [HyperFrames](https://hyperframes.heygen.com); the source is in [`docs/video`](docs/video).
+
 - Create goals and plan time **per day, per week, or per month**.
 - Daily goals repeat on the weekdays you pick (Every day / Weekdays / Weekends / custom). They can also have **different hours per weekday**, e.g. 1h Mon–Thu and 3h on Saturday.
 - Week and month goals show progress for the whole period plus a **suggested pace for today**.

@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <!-- Vendored so the video re-renders offline, like the app itself. -->
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      /* Palette lifted from the app's Midnight theme (src/lib/themes.ts). */
+      :root {
+        --n-950: #020617;
+        --n-900: #0f172a;
+        --n-800: #1e293b;
+        --n-700: #334155;
+        --n-400: #94a3b8;
+        --n-300: #cbd5e1;
+        --n-100: #f1f5f9;
+        --accent: #10b981;
+        --accent-fg: #34d399;
+        --pink: #f472b6;
+        --amber: #fbbf24;
+        --blue: #60a5fa;
+        --violet: #a78bfa;
+        --red: #f87171;
+        --font: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--n-950);
+        font-family: var(--font);
+        color: var(--n-100);
+        -webkit-font-smoothing: antialiased;
+      }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      .clip { position: absolute; inset: 0; }
+      .center { display: flex; align-items: center; justify-content: center; flex-direction: column; }
+      .accent { color: var(--accent-fg); }
+      .muted { color: var(--n-400); }
+
+      /* Background: soft drifting glows + a faint grid. */
+      #bg { z-index: 0; }
+      .glow { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.35; }
+      #glow-a { width: 900px; height: 900px; left: -200px; top: -300px; background: #10b981; }
+      #glow-b { width: 800px; height: 800px; right: -250px; bottom: -350px; background: #6366f1; opacity: 0.25; }
+      #grid {
+        position: absolute; inset: -100px;
+        background-image:
+          linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+        background-size: 80px 80px;
+      }
+      .scene { z-index: 2; }
+
+      .step {
+        position: absolute; top: 96px; left: 0; right: 0; margin: 0 auto; width: fit-content;
+        padding: 12px 26px; border-radius: 999px; border: 2px solid var(--n-700);
+        background: var(--n-900); font-size: 26px; font-weight: 700; letter-spacing: 0.18em;
+        color: var(--accent-fg); white-space: nowrap;
+      }
+      .heading {
+        position: absolute; top: 178px; left: 0; right: 0; text-align: center;
+        font-size: 84px; font-weight: 800; letter-spacing: -0.035em;
+      }
+      .card {
+        background: var(--n-900); border: 2px solid var(--n-800); border-radius: 36px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      }
+
+      /* ---------- Scene 1: hook ---------- */
+      #s1-pre { font-size: 56px; font-weight: 600; color: var(--n-300); }
+      #s1-num-wrap { display: flex; align-items: baseline; gap: 28px; margin-top: 10px; }
+      #s1-num { font-size: 260px; font-weight: 900; letter-spacing: -0.06em; line-height: 1; font-variant-numeric: tabular-nums; }
+      #s1-unit { font-size: 110px; font-weight: 800; letter-spacing: -0.04em; color: var(--accent-fg); }
+      #s1-q { position: absolute; top: 640px; left: 0; right: 0; text-align: center; font-size: 96px; font-weight: 800; letter-spacing: -0.035em; }
+      #s1-q span { display: inline-block; margin: 0 14px; }
+      .mini-clock { position: absolute; width: 90px; height: 90px; opacity: 0.45; }
+
+      /* ---------- Scene 2: logo ---------- */
+      #s2-brand { position: absolute; left: 0; right: 0; top: 330px; display: flex; align-items: center; justify-content: center; gap: 56px; }
+      #s2-logo { width: 300px; height: 300px; }
+      #s2-title { font-size: 128px; font-weight: 900; letter-spacing: -0.045em; line-height: 1; white-space: nowrap; }
+      #s2-title span { display: inline-block; }
+      #s2-tag { position: absolute; top: 720px; left: 0; right: 0; text-align: center; font-size: 52px; font-weight: 600; color: var(--n-300); }
+
+      /* ---------- Scene 3: plan ---------- */
+      #s3-seg {
+        position: absolute; top: 320px; left: 50%; width: 780px; margin-left: -390px; height: 84px;
+        display: flex; background: var(--n-900); border: 2px solid var(--n-800); border-radius: 999px; padding: 8px;
+      }
+      #s3-seg-pill { position: absolute; top: 8px; left: 8px; width: 252px; height: 64px; border-radius: 999px; background: var(--accent); }
+      .seg-opt { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; color: var(--n-300); }
+      #s3-grid { position: absolute; top: 470px; left: 50%; width: 1440px; margin-left: -720px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+      .goal { height: 230px; display: flex; align-items: center; gap: 36px; padding: 0 44px; }
+      .goal-icon { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px; flex: none; }
+      .goal-name { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; }
+      .goal-plan { font-size: 32px; font-weight: 600; color: var(--n-300); margin-top: 6px; }
+      .goal-pill { margin-left: auto; padding: 12px 22px; border-radius: 999px; font-size: 26px; font-weight: 800; color: var(--n-900); flex: none; }
+      .days { display: flex; gap: 10px; margin-top: 14px; }
+      .day { width: 46px; height: 46px; border-radius: 12px; background: var(--n-800); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; color: var(--n-300); }
+
+      /* ---------- Scene 4: tap ---------- */
+      #s4-card { position: absolute; z-index: 3; left: 50%; top: 380px; width: 1240px; margin-left: -620px; height: 380px; display: flex; align-items: center; padding: 0 64px; gap: 56px; }
+      #s4-ring { width: 260px; height: 260px; position: relative; flex: none; }
+      #s4-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+      #s4-ring .emoji { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 100px; }
+      #s4-name { font-size: 72px; font-weight: 800; letter-spacing: -0.03em; }
+      #s4-status { position: relative; height: 56px; margin-top: 12px; width: 520px; }
+      #s4-status div { position: absolute; left: 0; top: 0; font-size: 44px; font-weight: 600; color: var(--n-300); white-space: nowrap; }
+      #s4-status .done { color: var(--accent-fg); font-weight: 800; }
+      #s4-btn {
+        margin-left: auto; width: 250px; height: 250px; border-radius: 56px; background: var(--pink); color: var(--n-900);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none;
+        box-shadow: 0 20px 50px rgba(244, 114, 182, 0.35);
+      }
+      #s4-btn b { font-size: 92px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; }
+      #s4-btn small { font-size: 34px; font-weight: 800; letter-spacing: 0.08em; margin-top: 6px; }
+      .float-plus { position: absolute; top: 440px; left: 1306px; font-size: 64px; font-weight: 900; color: var(--pink); opacity: 0; }
+      #s4-finger { position: absolute; left: 0; top: 0; width: 110px; height: 110px; z-index: 5; }
+      #s4-finger .dot { position: absolute; inset: 20px; border-radius: 50%; background: rgba(241, 245, 249, 0.9); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+      .ripple { position: absolute; left: 0; top: 0; width: 110px; height: 110px; border-radius: 50%; border: 6px solid var(--n-100); opacity: 0; z-index: 4; }
+      #s4-toast {
+        position: absolute; left: 0; right: 0; margin: 0 auto; width: fit-content; top: 870px;
+        padding: 26px 42px; border-radius: 999px; background: var(--n-800); border: 2px solid var(--n-700);
+        font-size: 36px; font-weight: 600; white-space: nowrap; display: flex; gap: 40px;
+      }
+      .confetti { position: absolute; left: 0; top: 0; width: 18px; height: 30px; border-radius: 4px; opacity: 0; z-index: 2; }
+
+      /* ---------- Scene 5: week ---------- */
+      #s5-chart { position: absolute; left: 190px; top: 360px; width: 900px; height: 600px; padding: 48px 56px; }
+      #s5-chart header { display: flex; justify-content: space-between; align-items: baseline; }
+      #s5-chart header span { font-size: 34px; font-weight: 600; color: var(--n-300); }
+      #s5-total { font-size: 50px; font-weight: 900; font-variant-numeric: tabular-nums; }
+      #s5-bars { position: absolute; left: 56px; right: 56px; bottom: 100px; height: 340px; display: flex; gap: 22px; align-items: flex-end; }
+      .col { flex: 1; height: 100%; position: relative; }
+      .plan { position: absolute; left: 0; right: 0; bottom: 0; border: 3px dashed var(--n-700); border-radius: 18px; }
+      .bar { position: absolute; left: 8px; right: 8px; bottom: 0; border-radius: 16px; background: var(--accent); transform-origin: bottom; }
+      .lbl { position: absolute; bottom: -62px; left: 0; right: 0; text-align: center; font-size: 30px; font-weight: 700; color: var(--n-400); }
+      #s5-rows { position: absolute; left: 1150px; top: 360px; width: 580px; display: flex; flex-direction: column; gap: 30px; }
+      .row { padding: 28px 32px; }
+      .row header { display: flex; justify-content: space-between; font-size: 34px; font-weight: 700; }
+      .row header span:last-child { color: var(--n-300); font-weight: 600; }
+      .cells { display: flex; gap: 10px; margin-top: 20px; }
+      .cell { flex: 1; height: 50px; border-radius: 12px; background: var(--n-800); }
+
+      /* ---------- Scene 6: themes ---------- */
+      #s6-sub { position: absolute; top: 290px; left: 0; right: 0; text-align: center; font-size: 44px; font-weight: 600; color: var(--n-300); }
+      #s6-fan { position: absolute; left: 50%; top: 400px; width: 0; height: 0; }
+      .tcard { position: absolute; left: -130px; top: 0; width: 260px; height: 420px; transform-origin: 50% 1500px; }
+      .face { position: absolute; inset: 0; border-radius: 34px; padding: 26px; display: flex; flex-direction: column; gap: 18px; border: 3px solid; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+      .face .t-ring { width: 110px; height: 110px; border-radius: 50%; border: 16px solid; align-self: center; margin-top: 12px; }
+      .face .t-bar { height: 22px; border-radius: 99px; }
+      .face .t-btn { height: 74px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; margin-top: auto; }
+      .face .t-name { text-align: center; font-size: 30px; font-weight: 800; }
+
+      /* ---------- Scene 7: real app ---------- */
+      #s7-browser { position: absolute; left: 520px; top: 300px; width: 1240px; border-radius: 26px; overflow: hidden; border: 2px solid var(--n-700); background: var(--n-900); box-shadow: 0 40px 100px rgba(0,0,0,0.6); }
+      #s7-browser .bar { position: static; height: 54px; border-radius: 0; background: var(--n-800); display: flex; align-items: center; gap: 12px; padding: 0 22px; transform: none; }
+      .dotw { width: 16px; height: 16px; border-radius: 50%; }
+      .url { margin-left: 24px; padding: 6px 22px; border-radius: 99px; background: var(--n-900); font-size: 20px; color: var(--n-300); }
+      #s7-browser img { display: block; width: 100%; }
+      #s7-phone { position: absolute; left: 230px; top: 250px; width: 370px; height: 752px; border-radius: 56px; padding: 14px; background: #000; border: 3px solid var(--n-700); box-shadow: 0 40px 100px rgba(0,0,0,0.7); }
+      #s7-phone img { width: 100%; height: 100%; border-radius: 44px; object-fit: cover; object-position: top; display: block; }
+      .badge { position: absolute; padding: 18px 30px; border-radius: 999px; background: var(--n-100); color: var(--n-900); font-size: 30px; font-weight: 800; white-space: nowrap; box-shadow: 0 20px 50px rgba(0,0,0,0.5); z-index: 3; }
+
+      /* ---------- Scene 8: outro ---------- */
+      #s8-logo { width: 190px; height: 190px; position: absolute; left: 50%; margin-left: -95px; top: 150px; }
+      #s8-lines { position: absolute; top: 390px; left: 0; right: 0; display: flex; justify-content: center; gap: 40px; font-size: 120px; font-weight: 900; letter-spacing: -0.045em; }
+      #s8-lines span { display: inline-block; }
+      #s8-url { position: absolute; top: 640px; left: 0; right: 0; margin: 0 auto; width: fit-content; padding: 24px 48px; border-radius: 999px; background: var(--accent); color: #022c22; font-size: 46px; font-weight: 800; white-space: nowrap; }
+      #s8-foot { position: absolute; top: 800px; left: 0; right: 0; text-align: center; font-size: 38px; font-weight: 600; color: var(--n-300); }
+      #fade { z-index: 20; background: #000; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="38" data-width="1920" data-height="1080">
+      <div id="bg" class="clip" data-start="0" data-duration="38" data-track-index="0">
+        <div id="grid"></div>
+        <div id="glow-a" class="glow"></div>
+        <div id="glow-b" class="glow"></div>
+      </div>
+
+      <!-- 1 · Hook -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="4.3" data-track-index="1">
+        <div id="s1-clocks"></div>
+        <div class="center" style="position:absolute;inset:0;padding-bottom:200px">
+          <div id="s1-pre">Every week gives you</div>
+          <div id="s1-num-wrap"><div id="s1-num">0</div><div id="s1-unit">hours</div></div>
+        </div>
+        <div id="s1-q"><span>Where</span><span>did</span><span class="accent">yours</span><span>go?</span></div>
+      </div>
+
+      <!-- 2 · Brand -->
+      <div id="s2" class="clip scene" data-start="4.2" data-duration="3.9" data-track-index="1">
+        <div id="s2-brand">
+          <svg id="s2-logo" viewBox="0 0 512 512">
+            <rect id="s2-tile" width="512" height="512" rx="112" fill="#0f172a" stroke="#1e293b" stroke-width="6" />
+            <circle cx="256" cy="256" r="150" fill="none" stroke="#1e293b" stroke-width="44" />
+            <path id="s2-arc" d="M256 106a150 150 0 1 1-129.9 225" fill="none" stroke="#34d399" stroke-width="44" stroke-linecap="round" stroke-dasharray="640" stroke-dashoffset="640" />
+            <g id="s2-hands"><path d="M256 176v86l56 36" fill="none" stroke="#e2e8f0" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" /></g>
+          </svg>
+          <div id="s2-title"></div>
+        </div>
+        <div id="s2-tag">Plan hours per goal. Log them in a tap.</div>
+      </div>
+
+      <!-- 3 · Plan -->
+      <div id="s3" class="clip scene" data-start="8" data-duration="5.6" data-track-index="1">
+        <div class="step">01 · PLAN</div>
+        <div class="heading">Plan hours for <span class="accent">every goal</span></div>
+        <div id="s3-seg">
+          <div id="s3-seg-pill"></div>
+          <div class="seg-opt" style="color:#022c22">per day</div><div class="seg-opt">per week</div><div class="seg-opt">per month</div>
+        </div>
+        <div id="s3-grid">
+          <div class="goal card"><div class="goal-icon" style="background:rgba(244,114,182,.18)">🎸</div><div><div class="goal-name">Guitar</div><div class="goal-plan">10h this week</div></div><div class="goal-pill" style="background:var(--pink)">WEEK</div></div>
+          <div class="goal card"><div class="goal-icon" style="background:rgba(251,191,36,.18)">📚</div><div><div class="goal-name">Reading</div><div class="goal-plan">1h every day</div></div><div class="goal-pill" style="background:var(--amber)">DAY</div></div>
+          <div class="goal card"><div class="goal-icon" style="background:rgba(96,165,250,.18)">🗣️</div><div><div class="goal-name">Spanish</div><div class="goal-plan">10h this month</div></div><div class="goal-pill" style="background:var(--blue)">MONTH</div></div>
+          <div class="goal card"><div class="goal-icon" style="background:rgba(52,211,153,.18)">✍️</div><div><div class="goal-name">Deep work</div><div class="days" id="s3-days"><div class="day">M</div><div class="day">T</div><div class="day">W</div><div class="day">T</div><div class="day">F</div><div class="day">S</div><div class="day">S</div></div></div><div class="goal-pill" style="background:var(--accent-fg)">2h</div></div>
+        </div>
+      </div>
+
+      <!-- 4 · Tap -->
+      <div id="s4" class="clip scene" data-start="13.5" data-duration="6.6" data-track-index="1">
+        <div class="step">02 · LOG</div>
+        <div class="heading">Log time in <span class="accent">one tap</span></div>
+        <div id="s4-card" class="card">
+          <div id="s4-ring">
+            <svg viewBox="0 0 260 260" width="260" height="260">
+              <circle cx="130" cy="130" r="110" fill="none" stroke="#1e293b" stroke-width="26" />
+              <circle id="s4-arc" cx="130" cy="130" r="110" fill="none" stroke="#f472b6" stroke-width="26" stroke-linecap="round" stroke-dasharray="691.15" stroke-dashoffset="691.15" />
+            </svg>
+            <div class="emoji">🎸</div>
+          </div>
+          <div>
+            <div id="s4-name">Guitar</div>
+            <div id="s4-status">
+              <div id="st0">0m of 1h 30m today</div>
+              <div id="st1" style="opacity:0">30m of 1h 30m today</div>
+              <div id="st2" style="opacity:0">1h of 1h 30m today</div>
+              <div id="st3" class="done" style="opacity:0">Done · 1h 30m 🎉</div>
+            </div>
+          </div>
+          <div id="s4-btn"><b>+30</b><small>MIN</small></div>
+        </div>
+        <div class="float-plus" id="fp1">+30m</div>
+        <div class="float-plus" id="fp2">+30m</div>
+        <div class="float-plus" id="fp3">+30m</div>
+        <div class="ripple" id="rp1"></div>
+        <div class="ripple" id="rp2"></div>
+        <div class="ripple" id="rp3"></div>
+        <div id="s4-finger"><div class="dot"></div></div>
+        <div id="s4-confetti"></div>
+        <div id="s4-toast"><span>+30m · Guitar</span><span class="accent" style="font-weight:800">Undo</span></div>
+      </div>
+
+      <!-- 5 · Week -->
+      <div id="s5" class="clip scene" data-start="20" data-duration="4.6" data-track-index="1">
+        <div class="step">03 · REVIEW</div>
+        <div class="heading">See your <span class="accent">whole week</span></div>
+        <div id="s5-chart" class="card">
+          <header><span>Logged this week</span><div><span id="s5-total">0h</span><span class="muted" style="font-size:50px;font-weight:800"> / 22h</span></div></header>
+          <div id="s5-bars"></div>
+        </div>
+        <div id="s5-rows"></div>
+      </div>
+
+      <!-- 6 · Themes -->
+      <div id="s6" class="clip scene" data-start="24.5" data-duration="4.1" data-track-index="1">
+        <div class="heading" style="top:150px">Make it <span class="accent">yours</span></div>
+        <div id="s6-sub">7 themes, each in dark <span id="s6-and">and light</span></div>
+        <div id="s6-fan" data-layout-allow-overlap data-layout-allow-occlusion data-layout-ignore></div>
+      </div>
+
+      <!-- 7 · Real app -->
+      <div id="s7" class="clip scene" data-start="28.5" data-duration="4.1" data-track-index="1">
+        <div class="heading" style="top:100px">Phone or desktop. <span class="accent">Online or off.</span></div>
+        <div id="s7-browser">
+          <div class="bar"><div class="dotw" style="background:#f87171"></div><div class="dotw" style="background:#fbbf24"></div><div class="dotw" style="background:#34d399"></div><div class="url" data-layout-ignore>nidplays.github.io/disciplined-times</div></div>
+          <img src="assets/desktop.png" alt="" />
+        </div>
+        <div id="s7-phone"><img src="assets/today.png" alt="" /></div>
+        <div class="badge" id="b1" style="left:110px;top:880px">✈️ Works offline</div>
+        <div class="badge" id="b2" style="left:560px;top:960px">🔒 No account, no tracking</div>
+        <div class="badge" id="b3" style="left:1180px;top:960px">📲 Installs as an app</div>
+        <div class="badge" id="b4" style="left:1470px;top:250px">⚡ Keyboard shortcuts</div>
+      </div>
+
+      <!-- 8 · Outro -->
+      <div id="s8" class="clip scene" data-start="32.5" data-duration="5.5" data-track-index="1">
+        <img id="s8-logo" src="assets/logo.svg" alt="" />
+        <div id="s8-lines"><span>Plan it.</span><span>Tap it.</span><span class="accent">Own your time.</span></div>
+        <div id="s8-url">nidplays.github.io/disciplined-times</div>
+        <div id="s8-foot">Free · Open source · Your data never leaves your device</div>
+      </div>
+
+      <div id="fade" class="clip" data-start="37.3" data-duration="0.7" data-track-index="2"></div>
+
+      <audio id="music" src="assets/soundtrack.m4a" data-start="0" data-duration="38" data-track-index="3" data-volume="1"></audio>
+    </div>
+
+    <script>
+      // Seeded PRNG: the render contract forbids Math.random, and every frame must be reproducible.
+      let seed = 7
+      const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646
+      const $ = (s) => document.querySelector(s)
+      const $$ = (s) => Array.from(document.querySelectorAll(s))
+
+      // ---- build DOM that is easier to generate than to hand-write ----
+      const clockSvg = '<svg viewBox="0 0 90 90" width="90" height="90"><circle cx="45" cy="45" r="38" fill="none" stroke="#334155" stroke-width="7"/><path class="h" d="M45 45V20" stroke="#64748b" stroke-width="7" stroke-linecap="round"/></svg>'
+      const clocks = $('#s1-clocks')
+      for (let i = 0; i < 14; i++) {
+        const c = document.createElement('div')
+        c.className = 'mini-clock'
+        c.style.left = 80 + rand() * 1700 + 'px'
+        c.style.top = 60 + rand() * 900 + 'px'
+        c.innerHTML = clockSvg
+        clocks.appendChild(c)
+      }
+
+      $('#s2-title').innerHTML = 'Disciplined Times'.split('').map((ch) => `<span>${ch === ' ' ? '&nbsp;' : ch}</span>`).join('')
+
+      const planH = [5, 5, 5, 5, 5, 2.5, 2.5]
+      const loggedH = [2, 3.5, 2.5, 4, 1.5, 1, 0]
+      const maxH = 5.5
+      $('#s5-bars').innerHTML = 'MTWTFSS'.split('').map((d, i) => `
+        <div class="col">
+          <div class="plan" style="height:${(planH[i] / maxH) * 100}%"></div>
+          <div class="bar" style="height:${(loggedH[i] / maxH) * 100}%;${loggedH[i] >= planH[i] - 1 ? '' : 'background:#059669'}"></div>
+          <div class="lbl">${d}</div>
+        </div>`).join('')
+      const rows = [
+        ['🎸 Guitar', '7h / 10h', '#f472b6', [1, 1, 0, 1, 1, 1, 0]],
+        ['📚 Reading', '5h / 7h', '#fbbf24', [1, 1, 1, 1, 1, 0, 0]],
+        ['✍️ Deep work', '8h / 10h', '#34d399', [1, 0, 1, 1, 1, 0, 0]],
+      ]
+      $('#s5-rows').innerHTML = rows.map(([n, t, c, on]) => `
+        <div class="row card"><header><span>${n}</span><span>${t}</span></header>
+        <div class="cells">${on.map((v) => `<div class="cell" ${v ? `data-c="${c}"` : ''}></div>`).join('')}</div></div>`).join('')
+
+      const themes = [
+        ['Midnight', ['#020617', '#0f172a', '#1e293b', '#f1f5f9', '#10b981', '#022c22'], ['#f8fafc', '#ffffff', '#e2e8f0', '#0f172a', '#047857', '#ffffff']],
+        ['Ocean', ['#04121c', '#0c1f2c', '#173041', '#e6f2f8', '#38bdf8', '#082f49'], ['#f0f9ff', '#ffffff', '#cfe3ee', '#0c1f2c', '#0369a1', '#ffffff']],
+        ['Forest', ['#0c0a09', '#1c1917', '#292524', '#f5f5f4', '#a3e635', '#1a2e05'], ['#fafaf9', '#ffffff', '#e7e5e4', '#1c1917', '#4d7c0f', '#ffffff']],
+        ['Sunset', ['#09090b', '#18181b', '#27272a', '#f4f4f5', '#fb923c', '#431407'], ['#fafafa', '#ffffff', '#e4e4e7', '#18181b', '#c2410c', '#ffffff']],
+        ['Rose', ['#030712', '#111827', '#1f2937', '#f3f4f6', '#fb7185', '#4c0519'], ['#f9fafb', '#ffffff', '#e5e7eb', '#111827', '#e11d48', '#ffffff']],
+        ['Grape', ['#0d0a1c', '#1a1530', '#2a2442', '#f3f0fb', '#a78bfa', '#2e1065'], ['#faf8ff', '#ffffff', '#e5def5', '#1a1530', '#7c3aed', '#ffffff']],
+        ['Mono', ['#0a0a0a', '#171717', '#262626', '#f5f5f5', '#f5f5f5', '#0a0a0a'], ['#fafafa', '#ffffff', '#e5e5e5', '#171717', '#171717', '#ffffff']],
+      ]
+      const face = (name, [page, card, line, text, acc, on], cls) => `
+        <div class="face ${cls}" style="background:${card};border-color:${line};color:${text}">
+          <div class="t-ring" style="border-color:${line};border-top-color:${acc};border-right-color:${acc}"></div>
+          <div class="t-name">${name}</div>
+          <div class="t-bar" style="background:${line}"><div style="width:65%;height:100%;border-radius:99px;background:${acc}"></div></div>
+          <div class="t-btn" style="background:${acc};color:${on}">+30</div>
+        </div>`
+      $('#s6-fan').innerHTML = themes.map(([n, d, l]) => `<div class="tcard">${face(n, d, 'dark')}${face(n, l, 'light')}</div>`).join('')
+
+      const confetti = $('#s4-confetti')
+      const confColors = ['#f472b6', '#fbbf24', '#60a5fa', '#34d399', '#a78bfa', '#f87171', '#22d3ee', '#a3e635']
+      const pieces = []
+      for (let i = 0; i < 70; i++) {
+        const p = document.createElement('div')
+        p.className = 'confetti'
+        p.style.background = confColors[i % confColors.length]
+        confetti.appendChild(p)
+        const a = rand() * Math.PI * 2
+        const v = 250 + rand() * 600
+        pieces.push({ el: p, dx: Math.cos(a) * v, dy: Math.sin(a) * v * 0.8 - 250, r: rand() * 900 - 450, d: 1.1 + rand() * 0.7 })
+      }
+
+      // ---- timeline ----
+      const tl = gsap.timeline({ paused: true })
+
+      // Background drift for the whole film.
+      tl.fromTo('#glow-a', { x: 0, y: 0 }, { x: 700, y: 300, duration: 38, ease: 'sine.inOut' }, 0)
+      tl.fromTo('#glow-b', { x: 0, y: 0 }, { x: -800, y: -200, duration: 38, ease: 'sine.inOut' }, 0)
+      tl.fromTo('#grid', { x: 0, y: 0 }, { x: 80, y: 160, duration: 38, ease: 'none' }, 0)
+      // Glow colour follows the story: emerald → pink (tap) → indigo.
+      tl.to('#glow-a', { backgroundColor: '#f472b6', duration: 1, ease: 'sine.inOut' }, 13.5)
+      tl.to('#glow-a', { backgroundColor: '#10b981', duration: 1, ease: 'sine.inOut' }, 20)
+
+      // 1 · Hook
+      $$('.mini-clock').forEach((c, i) => {
+        tl.fromTo(c, { scale: 0, opacity: 0 }, { scale: 1, opacity: 0.45, duration: 0.4, ease: 'back.out(2)' }, 0.1 + i * 0.05)
+        tl.fromTo(c.querySelector('.h'), { rotation: 0, svgOrigin: '45 45' }, { rotation: 360 * (3 + (i % 4)), svgOrigin: '45 45', duration: 4, ease: 'power1.in' }, 0)
+      })
+            tl.fromTo('#s1-num-wrap', { scale: 0.8 }, { scale: 1, duration: 0.45, ease: 'back.out(1.8)' }, 0.3)
+      const count = { v: 0 }
+      tl.to(count, { v: 168, duration: 1.2, ease: 'power2.out', onUpdate: () => { $('#s1-num').textContent = Math.round(count.v) } }, 0.4)
+      tl.to('#s1-num-wrap', { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: 'power1.inOut' }, 1.6)
+      tl.to(['#s1-pre', '#s1-num-wrap'], { y: -110, duration: 0.5, ease: 'power3.inOut' }, 2.0)
+      tl.fromTo('#s1-q span', { opacity: 0, y: 60, scale: 0.5 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(2.5)', stagger: 0.16 }, 2.2)
+      tl.to('#s1-q .accent', { rotation: -6, scale: 1.15, duration: 0.15, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 3.0)
+      tl.to('#s1 > *', { opacity: 0, scale: 0.85, filter: 'blur(14px)', duration: 0.35, ease: 'power2.in' }, 3.9)
+
+      // 2 · Brand
+      tl.fromTo('#s2-logo', { scale: 0, rotation: -120 }, { scale: 1, rotation: 0, duration: 0.7, ease: 'back.out(1.6)' }, 4.25)
+      tl.to('#s2-arc', { attr: { 'stroke-dashoffset': 0 }, duration: 0.8, ease: 'power2.inOut' }, 4.6)
+      tl.fromTo('#s2-hands', { rotation: -360, svgOrigin: '256 256' }, { rotation: 0, svgOrigin: '256 256', duration: 1, ease: 'power3.out' }, 4.5)
+      tl.fromTo('#s2-title span', { opacity: 0, y: 80, rotationX: -90 }, { opacity: 1, y: 0, rotationX: 0, duration: 0.45, ease: 'back.out(2)', stagger: 0.035 }, 5.3)
+      tl.fromTo('#s2-tag', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }, 5.7)
+      tl.to('#s2-logo', { scale: 1.06, duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 6.7)
+      tl.to(['#s2-brand', '#s2-tag'], { y: -140, opacity: 0, duration: 0.4, ease: 'power3.in', stagger: 0.06 }, 7.6)
+
+      // 3 · Plan
+      const stepIn = (sel, t) => {
+        tl.fromTo(`${sel} .step`, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, t)
+        tl.fromTo(`${sel} .heading`, { opacity: 0, y: 40, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.6)' }, t + 0.1)
+      }
+      stepIn('#s3', 8.05)
+      tl.fromTo('#s3-seg', { opacity: 0, scaleX: 0.4 }, { opacity: 1, scaleX: 1, duration: 0.45, ease: 'back.out(1.5)' }, 8.4)
+      $$('#s3-grid .goal').forEach((g, i) => {
+        tl.fromTo(g, { opacity: 0, x: i % 2 ? 500 : -500, rotation: i % 2 ? 8 : -8 }, { opacity: 1, x: 0, rotation: 0, duration: 0.55, ease: 'back.out(1.3)' }, 8.7 + i * 0.15)
+      })
+      // The segmented control slides through day → week → month while the matching card bounces.
+      const segX = [0, 252, 504]
+      const bounceOrder = [1, 0, 2]
+      ;[9.8, 10.7, 11.6].forEach((t, i) => {
+        tl.to('#s3-seg-pill', { x: segX[i], duration: 0.35, ease: 'back.out(1.6)' }, t)
+        $$('#s3-seg .seg-opt').forEach((o, j) => tl.to(o, { color: j === i ? '#022c22' : '#cbd5e1', duration: 0.15 }, t + 0.05))
+        tl.to($$('#s3-grid .goal')[bounceOrder[i]], { scale: 1.06, duration: 0.18, yoyo: true, repeat: 1, ease: 'power2.out' }, t + 0.05)
+      })
+      $$('#s3-days .day').forEach((d, i) => {
+        if (i > 4) return
+        tl.to(d, { backgroundColor: '#34d399', color: '#0f172a', scale: 1.15, duration: 0.15, ease: 'back.out(3)' }, 12.0 + i * 0.1)
+        tl.to(d, { scale: 1, duration: 0.15 }, 12.15 + i * 0.1)
+      })
+      tl.to('#s3-grid .goal', { y: 700, rotation: (i) => (i % 2 ? 12 : -12), opacity: 0, duration: 0.45, ease: 'power3.in', stagger: 0.05 }, 13.05)
+      tl.to(['#s3 .step', '#s3 .heading', '#s3-seg'], { opacity: 0, y: -40, duration: 0.3, ease: 'power2.in' }, 13.15)
+
+      // 4 · Tap
+      stepIn('#s4', 13.55)
+      tl.fromTo('#s4-card', { opacity: 0, scale: 0.7, y: 80 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'back.out(1.5)' }, 13.8)
+      // Finger: button centre is ≈ (1391, 570); the finger is 110px, so offset by 55.
+      tl.fromTo('#s4-finger', { x: 1850, y: 1150, opacity: 0 }, { x: 1336, y: 515, opacity: 1, duration: 0.6, ease: 'power3.out' }, 14.2)
+      const taps = [14.95, 15.75, 16.55]
+      taps.forEach((t, i) => {
+        const n = i + 1
+        tl.to('#s4-finger', { scale: 0.8, duration: 0.08, yoyo: true, repeat: 1, ease: 'power1.inOut' }, t)
+        tl.to('#s4-btn', { scale: 0.86, duration: 0.08, ease: 'power2.out' }, t)
+        tl.to('#s4-btn', { scale: 1, duration: 0.4, ease: 'elastic.out(1.2, 0.4)' }, t + 0.08)
+        tl.fromTo(`#rp${n}`, { x: 1336, y: 515, scale: 0.5, opacity: 0.9 }, { scale: 3, opacity: 0, duration: 0.6, ease: 'power2.out' }, t)
+        tl.fromTo(`#fp${n}`, { y: 0, opacity: 0, scale: 0.6 }, { y: -110, opacity: 1, scale: 1.2, duration: 0.35, ease: 'power2.out' }, t + 0.02)
+        tl.to(`#fp${n}`, { y: -150, opacity: 0, duration: 0.3, ease: 'power1.in' }, t + 0.4)
+        tl.to('#s4-arc', { attr: { 'stroke-dashoffset': 691.15 * (1 - n / 3) }, duration: 0.45, ease: 'back.out(1.4)' }, t + 0.05)
+        tl.set(`#st${n - 1}`, { opacity: 0 }, t + 0.05)
+        tl.fromTo(`#st${n}`, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out', immediateRender: false }, t + 0.05)
+      })
+      tl.fromTo('#s4-toast', { y: 200, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.6)' }, 15.05)
+      // Goal done: ring turns green, card pops, confetti bursts from the ring.
+      tl.to('#s4-arc', { attr: { stroke: '#34d399' }, duration: 0.2 }, 16.85)
+      tl.to('#s4-card', { scale: 1.05, duration: 0.15, yoyo: true, repeat: 1, ease: 'power2.out' }, 16.85)
+      tl.to('#s4-finger', { x: 1900, y: 1150, opacity: 0, duration: 0.6, ease: 'power2.in' }, 17.1)
+      pieces.forEach((p) => {
+        tl.fromTo(p.el, { x: 525, y: 555, opacity: 1, rotation: 0, scale: 1 }, { x: 525 + p.dx, rotation: p.r, duration: p.d, ease: 'power2.out' }, 16.9)
+        tl.to(p.el, { y: 555 + p.dy + 500, duration: p.d, ease: 'power1.in' }, 16.9)
+        tl.to(p.el, { opacity: 0, duration: 0.3 }, 16.9 + p.d - 0.3)
+      })
+      tl.to('#s4-ring .emoji', { scale: 1.3, rotation: 12, duration: 0.2, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 16.9)
+      tl.to(['#s4 .step', '#s4 .heading', '#s4-card', '#s4-toast'], { opacity: 0, x: -300, duration: 0.4, ease: 'power3.in', stagger: 0.04 }, 19.55)
+
+      // 5 · Week
+      stepIn('#s5', 20.05)
+      tl.fromTo('#s5-chart', { opacity: 0, x: -200 }, { opacity: 1, x: 0, duration: 0.5, ease: 'power3.out' }, 20.25)
+      tl.fromTo('#s5-bars .plan', { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.04 }, 20.5)
+      tl.fromTo('#s5-bars .bar', { scaleY: 0 }, { scaleY: 1, duration: 0.55, ease: 'back.out(1.8)', stagger: 0.12 }, 20.7)
+      const total = { v: 0 }
+      tl.to(total, {
+        v: 14.5, duration: 1.3, ease: 'power1.out',
+        onUpdate: () => {
+          const half = Math.round(total.v * 2) / 2
+          const h = Math.floor(half)
+          $('#s5-total').textContent = half % 1 ? `${h}h 30m` : `${h}h`
+        },
+      }, 20.7)
+      tl.fromTo('#s5-rows .row', { opacity: 0, x: 200 }, { opacity: 1, x: 0, duration: 0.45, ease: 'power3.out', stagger: 0.12 }, 20.5)
+      $$('#s5-rows .row').forEach((r, ri) => {
+        r.querySelectorAll('.cell[data-c]').forEach((c, ci) => {
+          tl.to(c, { backgroundColor: c.dataset.c, duration: 0.18, ease: 'power1.out' }, 21.1 + ri * 0.2 + ci * 0.07)
+        })
+      })
+      tl.to('#s5-chart', { scale: 1.03, duration: 0.2, yoyo: true, repeat: 1 }, 22.1)
+      tl.to(['#s5 .step', '#s5 .heading', '#s5-chart', '#s5-rows'], { opacity: 0, y: -60, duration: 0.35, ease: 'power3.in', stagger: 0.04 }, 24.15)
+
+      // 6 · Themes: deal the cards into a fan, then flip them all to light mode.
+      tl.fromTo('#s6 .heading', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(2)' }, 24.55)
+      tl.fromTo('#s6-sub', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }, 24.75)
+      $$('.tcard').forEach((c, i) => {
+        const rot = (i - 3) * 7
+        tl.fromTo(c, { y: 900, rotation: 0, opacity: 0 }, { y: 40, rotation: rot, opacity: 1, duration: 0.55, ease: 'back.out(1.3)' }, 24.9 + i * 0.09)
+        tl.set(c.querySelector('.light'), { opacity: 0 }, 24.5)
+        tl.to(c, { scaleX: 0, duration: 0.12, ease: 'power2.in' }, 26.6 + i * 0.08)
+        tl.set(c.querySelector('.light'), { opacity: 1 }, 26.72 + i * 0.08)
+        tl.to(c, { scaleX: 1, duration: 0.16, ease: 'back.out(2)' }, 26.72 + i * 0.08)
+      })
+      tl.to('#s6-and', { color: '#34d399', duration: 0.2 }, 26.6)
+      tl.to('#s6-fan', { y: -20, duration: 0.3, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 27.5)
+      tl.to('.tcard', { y: 1000, duration: 0.4, ease: 'power3.in', stagger: 0.03 }, 28.15)
+      tl.to(['#s6 .heading', '#s6-sub'], { opacity: 0, duration: 0.3 }, 28.2)
+
+      // 7 · Real app
+      tl.fromTo('#s7 .heading', { opacity: 0, y: -40 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' }, 28.55)
+      tl.fromTo('#s7-browser', { x: 900, rotationY: -25, opacity: 0, transformPerspective: 1600 }, { x: 0, rotationY: -8, opacity: 1, duration: 0.7, ease: 'power3.out' }, 28.65)
+      tl.fromTo('#s7-phone', { y: 900, rotation: -12 }, { y: 0, rotation: -4, duration: 0.7, ease: 'back.out(1.3)' }, 28.9)
+      tl.to('#s7-browser', { rotationY: 0, duration: 2.5, ease: 'sine.inOut' }, 29.4)
+      tl.to('#s7-phone', { rotation: 0, y: -12, duration: 2.5, ease: 'sine.inOut' }, 29.6)
+      ;['#b1', '#b2', '#b3', '#b4'].forEach((b, i) => {
+        tl.fromTo(b, { scale: 0, rotation: -10 }, { scale: 1, rotation: i % 2 ? 3 : -3, duration: 0.4, ease: 'back.out(2.5)' }, 29.6 + i * 0.35)
+      })
+      tl.to('#s7 > *', { opacity: 0, scale: 0.9, duration: 0.35, ease: 'power2.in' }, 32.2)
+
+      // 8 · Outro
+      tl.fromTo('#s8-logo', { scale: 0, rotation: 200 }, { scale: 1, rotation: 0, duration: 0.6, ease: 'back.out(1.6)' }, 32.55)
+      $$('#s8-lines span').forEach((s, i) => {
+        tl.fromTo(s, { opacity: 0, scale: 2.4, y: -40 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'power4.out' }, 33.0 + i * 0.5)
+      })
+      tl.to('#s8-lines .accent', { scale: 1.08, duration: 0.2, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 34.4)
+      tl.fromTo('#s8-url', { opacity: 0, y: 40, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(2)' }, 34.6)
+      tl.fromTo('#s8-foot', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 35.0)
+      tl.to('#s8-logo', { rotation: 360, duration: 1.2, ease: 'power2.inOut' }, 35.2)
+      tl.to('#fade', { opacity: 1, duration: 0.7, ease: 'power1.in' }, 37.3)
+
+      window.__timelines = window.__timelines || {}
+      window.__timelines['main'] = tl
+      tl.seek(0)
+    </script>
+  </body>
+</html>

@@ -30,6 +30,7 @@ src/
     ui.ts            toast + haptics
 public/              static assets and icons (regenerate PNGs with `bun run icons`)
 docs/                screenshots used by the README
+  video/             HyperFrames promo video (see its README)
 .github/workflows/   CI: test + build on every PR, deploy only from main
 ```
 
@@ -93,6 +94,7 @@ User data exists only in their browser, so **never break it**.
 - Respect `prefers-reduced-motion`.
 - It must work on both phones (touch, bottom tab bar) and desktop (sidebar, keyboard shortcuts). Check both layouts when changing UI. Touch gestures need a non-gesture alternative (e.g. buttons).
 - If you change user-facing behaviour, update `README.md` (features, shortcuts, deep links) and, where it helps, the screenshots in `docs/`.
+- Don't update the promo video in `docs/video` unless the user asks for it.
 
 ## Git and PRs
 
