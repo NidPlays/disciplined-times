@@ -28,8 +28,8 @@ const Bullet = ({ children, className = 'flex' }: { children: ReactNode; classNa
 
 /**
  * First-run walkthrough: shows how to create a goal, log time and read the week
- * (with a try-it-yourself sample goal), then goes through every setting using the
- * same controls as the Settings tab, so choices made here apply right away.
+ * (with a try-it-yourself sample goal), and ends on the Settings screen itself
+ * (same controls, install section included), so choices made here apply right away.
  */
 export function Onboarding({ open, onClose, onNewGoal, onSettings }: Props) {
   const [i, setI] = useState(0)
@@ -115,37 +115,25 @@ export function Onboarding({ open, onClose, onNewGoal, onSettings }: Props) {
       ),
     },
     {
-      title: 'Appearance',
-      intro: 'Pick a theme and whether it should be light, dark or follow your device.',
-      body: <Appearance />,
-    },
-    {
-      title: 'Your week',
-      intro: 'Weekly goals and the Week chart start on this day.',
-      body: <WeekStart />,
-    },
-    {
-      title: 'Install as an app',
-      intro: 'Optional. Installing gives you an app icon, its own window, offline use and quick “+30 min” shortcuts.',
-      body: isStandalone() ? (
-        <p className="rounded-3xl border border-n-800 bg-n-900 p-4 text-sm text-n-300">You're already using the installed app. Nothing to do here.</p>
-      ) : (
-        <InstallCard />
-      ),
-    },
-    {
-      title: 'Your data',
-      intro: 'No accounts, no servers, no tracking.',
+      title: 'Settings',
+      intro: 'Last step: make it yours. This is the Settings screen, and changes apply right away.',
       body: (
-        <ul className="space-y-2 text-sm text-n-300">
-          <Bullet>Everything is saved on this device only, and works offline.</Bullet>
-          <Bullet>
-            Use <strong className="text-n-100">Settings → Export backup</strong> to keep a copy or move to another device, and <strong className="text-n-100">Import backup</strong> to restore it.
-          </Bullet>
-          <Bullet>
-            Everything here can be changed later in <strong className="text-n-100">Settings</strong>, and you can take this tour again from there.
-          </Bullet>
-        </ul>
+        <>
+          <Appearance />
+          {isStandalone() ? (
+            <p className="rounded-3xl border border-n-800 bg-n-900 p-4 text-sm text-n-300">You're using the installed app, so there's nothing to install.</p>
+          ) : (
+            <InstallCard />
+          )}
+          <WeekStart />
+          <section className="space-y-1 rounded-3xl border border-n-800 bg-n-900 p-4">
+            <div className="font-medium">Your data</div>
+            <p className="text-sm text-n-400">
+              No accounts, no servers, no tracking. Everything is saved on this device only. Use <strong className="text-n-200">Export backup</strong> in Settings to keep a copy or move to another device.
+            </p>
+          </section>
+          <p className="text-sm text-n-400">You can change all of this later in Settings, and take this tour again from there.</p>
+        </>
       ),
     },
   ]
