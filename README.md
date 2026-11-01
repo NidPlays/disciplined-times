@@ -4,7 +4,9 @@ A website for planning **hours per goal** and logging time in quick taps. It wor
 
 **Live:** https://nidplays.github.io/disciplined-times/
 
-[![Watch the Disciplined Times promo video (38 s, with narration and sound)](docs/video/output/poster.jpg)](docs/video/output/disciplined-times.mp4)
+![Disciplined Times promo video](docs/video/output/disciplined-times.mp4)
+
+docs/video/output/disciplined-times.mp4
 
 ▶️ **[Watch the promo video](docs/video/output/disciplined-times.mp4)** (38 s, narrated). Made with [HyperFrames](https://hyperframes.heygen.com); the source is in [`docs/video`](docs/video).
 
