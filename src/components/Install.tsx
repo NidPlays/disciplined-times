@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { firstRun } from '../lib/onboarding'
 import type { Notice } from './Notices'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -83,11 +84,12 @@ const rememberDismissal = () => {
  * The "install as an app" notice for the top notification stack. Only on phones/tablets
  * that aren't already running the installed app: on Android/Chromium it triggers the
  * native install prompt; on iOS it explains Share → Add to Home Screen.
- * Dismissing hides it for 14 days.
+ * Dismissing hides it for 14 days. Skipped on a first visit, where the walkthrough
+ * already covers installing.
  */
 export function useInstallNotice(): Notice | null {
   useInstallState()
-  const [eligible] = useState(() => typeof window !== 'undefined' && isMobileDevice() && !isStandalone() && !recentlyDismissed())
+  const [eligible] = useState(() => typeof window !== 'undefined' && isMobileDevice() && !isStandalone() && !recentlyDismissed() && !firstRun)
   const [visible, setVisible] = useState(false)
   const [closed, setClosed] = useState(false)
 
@@ -134,7 +136,7 @@ export function InstallCard() {
   if (isStandalone()) return null
 
   return (
-    <section className="space-y-3 rounded-3xl border border-accent/30 bg-accent/5 p-4">
+    <section id="install" className="scroll-mt-6 space-y-3 rounded-3xl border border-accent/30 bg-accent/5 p-4">
       <div className="font-medium">Install as an app (optional)</div>
       {deferred ? (
         <>
