@@ -46,6 +46,18 @@ export function Settings({ onTour, onShortcuts }: { onTour: () => void; onShortc
 
       <WeekStart />
 
+      <section className={card}>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="font-medium">Walkthrough</div>
+            <p className="text-sm text-n-400">Replay the welcome tour: creating goals, logging time, reading your week and these settings.</p>
+          </div>
+          <button onClick={onTour} className="shrink-0 rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
+            Show walkthrough
+          </button>
+        </div>
+      </section>
+
       {/* Desktop only, like the sidebar: the shortcuts need a hardware keyboard. */}
       <section className={`${card} hidden md:block`}>
         <div className="flex items-center justify-between gap-3">
@@ -97,9 +109,6 @@ export function Settings({ onTour, onShortcuts }: { onTour: () => void; onShortc
             <p className="text-sm text-n-400">Version {__APP_VERSION__}</p>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
-            <button onClick={onTour} className="shrink-0 rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
-              Take the tour
-            </button>
             <button onClick={() => setChangelogOpen(true)} className="shrink-0 rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
               View changelog
             </button>
