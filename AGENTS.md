@@ -98,7 +98,13 @@ User data exists only in their browser, so **never break it**.
 
 - Never push to `main` directly. Work on a branch and open a PR into `main`.
 - Name branches `claude/<short-kebab-case-description>` describing the change (e.g. `claude/onboarding-tour`, `claude/keyboard-shortcuts-dialog`). Don't use auto-generated names like `ccr-…` or random suffixes. In a PR stack, give each branch its own descriptive name.
-- Keep PRs focused on one change. Write commit messages in the imperative mood ("Add …", "Fix …") with a short body explaining why.
+- Keep PRs focused on one change.
+- Write commit messages (and PR titles) in [Conventional Commits](https://www.conventionalcommits.org) style: `<type>(<optional scope>): <description>`, with a short body explaining why.
+  - **Types:** `feat` (user-facing feature), `fix` (bug fix), `docs`, `style` (formatting only), `refactor`, `perf`, `test`, `build` (deps, tooling), `ci`, `chore` (e.g. version bumps).
+  - **Scope** (optional): the area touched, e.g. `today`, `week`, `goals`, `settings`, `onboarding`, `shortcuts`, `store`, `pwa`, `agents`.
+  - **Description:** imperative, lowercase, no trailing period, about 72 characters max, e.g. `feat(week): swipe to change week`, `fix(store): keep theme when importing old backups`.
+  - **Breaking changes:** add `!` after the type/scope (`feat(store)!: …`) and a `BREAKING CHANGE:` footer saying what breaks and how data is migrated.
+  - The type should match the version bump: `feat` → MINOR, `fix`/`perf` and the rest → PATCH, `!` → MAJOR (MINOR while `0.x`).
 - Each PR includes: the code change, tests where applicable, the version bump in `package.json`, a `CHANGELOG.md` entry and any README updates.
 - Don't touch `.github/workflows/` unless the task is about CI. Deploys must stay restricted to pushes to `main` on `NidPlays/disciplined-times`.
 - Don't commit build output (`dist/`, `dev-dist/`), `node_modules/` or `*.tsbuildinfo`.
