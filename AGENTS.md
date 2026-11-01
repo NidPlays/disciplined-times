@@ -30,6 +30,7 @@ src/
     ui.ts            toast + haptics
 public/              static assets and icons (regenerate PNGs with `bun run icons`)
 docs/                screenshots used by the README
+  video/             HyperFrames promo video (source, MP4 and README preview)
 .github/workflows/   CI: test + build on every PR, deploy only from main
 ```
 

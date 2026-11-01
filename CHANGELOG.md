@@ -2,6 +2,10 @@
 
 All notable changes to Disciplined Times. The project uses [Semantic Versioning](https://semver.org); see `AGENTS.md` for when to bump which number.
 
+## 0.5.3
+
+- New **promo video**: a 38-second tour of planning, one-tap logging, the Week view and themes. It plays at the top of the README, and its source (made with HyperFrames) is in `docs/video`. No changes to the app.
+
 ## 0.5.2
 
 - Contributor guidelines (`AGENTS.md`): commit messages and PR titles now follow the Conventional Commits style (`feat: …`, `fix: …`). No changes to the app.
