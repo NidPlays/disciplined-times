@@ -2,6 +2,10 @@
 
 All notable changes to Disciplined Times. The project uses [Semantic Versioning](https://semver.org); see `AGENTS.md` for when to bump which number.
 
+## 0.5.2
+
+- Contributor guidelines (`AGENTS.md`): commit messages and PR titles now follow the Conventional Commits style (`feat: …`, `fix: …`). No changes to the app.
+
 ## 0.5.1
 
 - Contributor guidelines (`AGENTS.md`): AI agents now name branches `claude/<what-changed>` instead of auto-generated names. No changes to the app.
