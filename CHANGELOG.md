@@ -2,6 +2,10 @@
 
 All notable changes to Disciplined Times. The project uses [Semantic Versioning](https://semver.org); see `AGENTS.md` for when to bump which number.
 
+## 0.6.0
+
+- **Settings:** the welcome walkthrough now has its own **Walkthrough** card with a **Show walkthrough** button, so it's easy to find when you want to see the tour again.
+
 ## 0.5.2
 
 - Contributor guidelines (`AGENTS.md`): commit messages and PR titles now follow the Conventional Commits style (`feat: …`, `fix: …`). No changes to the app.
