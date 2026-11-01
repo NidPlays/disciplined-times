@@ -2,6 +2,10 @@
 
 All notable changes to Disciplined Times. The project uses [Semantic Versioning](https://semver.org); see `AGENTS.md` for when to bump which number.
 
+## 0.5.1
+
+- Contributor guidelines (`AGENTS.md`): AI agents now name branches `claude/<what-changed>` instead of auto-generated names. No changes to the app.
+
 ## 0.5.0
 
 - **Keyboard shortcuts:** press `?` (or click **Keyboard shortcuts** at the bottom of the sidebar, or **Show shortcuts** in Settings on a computer) to see every shortcut. Pick one, or just press its keys, and a keyboard picture above the list lights up the keys to press. The keyboard matches your computer (Mac, Windows or Linux) and you can switch between them.
