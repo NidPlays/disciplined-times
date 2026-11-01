@@ -7,7 +7,7 @@ import { Changelog } from './Changelog'
 import { InstallCard, isStandalone } from './Install'
 import { WeekStart } from './WeekStart'
 
-export function Settings({ onTour }: { onTour: () => void }) {
+export function Settings({ onTour, onShortcuts }: { onTour: () => void; onShortcuts: () => void }) {
   const { importData, reset, goals, logs } = useStore()
   const notify = useUi((s) => s.notify)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -45,6 +45,21 @@ export function Settings({ onTour }: { onTour: () => void }) {
       <InstallCard />
 
       <WeekStart />
+
+      {/* Desktop only, like the sidebar: the shortcuts need a hardware keyboard. */}
+      <section className={`${card} hidden md:block`}>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="font-medium">Keyboard shortcuts</div>
+            <p className="text-sm text-n-400">
+              Press <kbd className="rounded border border-n-700 px-1 text-xs">?</kbd> anywhere to see every shortcut and where its keys are.
+            </p>
+          </div>
+          <button onClick={onShortcuts} className="shrink-0 rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
+            Show shortcuts
+          </button>
+        </div>
+      </section>
 
       <section className={card}>
         <div>

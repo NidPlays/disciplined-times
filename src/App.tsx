@@ -62,6 +62,7 @@ export default function App() {
   const [tour, setTour] = useState(firstRun)
   const [help, setHelp] = useState(false)
   const closeHelp = useCallback(() => setHelp(false), [])
+  const openHelp = useCallback(() => setHelp(true), [])
   const closeTour = useCallback(() => setTour(false), [])
   const openTour = useCallback(() => setTour(true), [])
   // From the tour's last step: land on Settings with the install section in view.
@@ -198,7 +199,7 @@ export default function App() {
             />
           )}
           {tab === 'goals' && <Goals onEdit={openEdit} onNew={openNew} />}
-          {tab === 'settings' && <Settings onTour={openTour} />}
+          {tab === 'settings' && <Settings onTour={openTour} onShortcuts={openHelp} />}
         </div>
       </main>
 
