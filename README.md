@@ -12,7 +12,7 @@ A website for planning **hours per goal** and logging time in quick taps. It wor
 - **Works as a normal website.** On desktop it has a sidebar, a multi-column layout and keyboard shortcuts (`N` new goal, `1`–`4` switch tabs, `←`/`→` change day, `T` today). Tabs live in the URL hash (`#week`, `#goals`), so browser back/forward and bookmarks work.
 - **Themes:** Midnight, Ocean, Forest, Sunset, Rose, Grape and Mono. Each has a dark and a light version, and you can choose Light, Dark or follow the device (System) under Settings → Appearance.
 - **Installs as an app** on iOS, Android and desktop, and works offline. All data stays on the device, with JSON export and import for backups.
-- **Welcome tour:** first-time visitors get a short walkthrough of the app and all settings (appearance, week start, install, data), ending with "Create a goal" or "Open Settings" (scrolled to the install section). Replay it any time from Settings → Take the tour.
+- **Welcome tour:** first-time visitors get a short walkthrough: creating a goal, logging time on a try-it-yourself sample goal, the Week chart, then all settings (appearance, week start, install, data), ending with "Create a goal" or "Open Settings" (scrolled to the install section). Replay it any time from Settings → Take the tour.
 - **Changelog in the app:** Settings → View changelog shows what changed in each version (from `CHANGELOG.md`).
 
 ![Desktop](docs/desktop.png)

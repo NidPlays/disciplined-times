@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { markOnboarded } from '../lib/onboarding'
 import { Appearance } from './Appearance'
 import { InstallCard, isStandalone } from './Install'
+import { CreateGoalDemo, LogTimeDemo, WeekDemo } from './OnboardingDemos'
 import { Sheet } from './Sheet'
 import { WeekStart } from './WeekStart'
 
@@ -18,17 +19,17 @@ interface Step {
   body: ReactNode
 }
 
-const Bullet = ({ children }: { children: ReactNode }) => (
-  <li className="flex gap-3">
+const Bullet = ({ children, className = 'flex' }: { children: ReactNode; className?: string }) => (
+  <li className={`${className} gap-3`}>
     <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
     <span>{children}</span>
   </li>
 )
 
 /**
- * First-run walkthrough: introduces the app, then goes through every setting
- * (appearance, week start, installing, data) using the same controls as the
- * Settings tab, so choices made here apply right away.
+ * First-run walkthrough: shows how to create a goal, log time and read the week
+ * (with a try-it-yourself sample goal), then goes through every setting using the
+ * same controls as the Settings tab, so choices made here apply right away.
  */
 export function Onboarding({ open, onClose, onNewGoal, onSettings }: Props) {
   const [i, setI] = useState(0)
@@ -48,19 +49,69 @@ export function Onboarding({ open, onClose, onNewGoal, onSettings }: Props) {
       intro: 'Plan how many hours you want to give each goal, then log time in quick taps.',
       body: (
         <ul className="space-y-2 text-sm text-n-300">
-          <Bullet>
-            <strong className="text-n-100">Goals</strong> get a target per day, week or month.
-          </Bullet>
-          <Bullet>
-            <strong className="text-n-100">Today</strong> shows what's planned. Tap <strong className="text-n-100">+</strong> to log time, and undo if you slip.
-          </Bullet>
-          <Bullet>
-            <strong className="text-n-100">Week</strong> charts your progress. Swipe or use the arrows to look back.
-          </Bullet>
-          <Bullet>
-            On a computer: <kbd>N</kbd> new goal, <kbd>1</kbd>–<kbd>4</kbd> tabs, <kbd>←</kbd>/<kbd>→</kbd> change day, <kbd>T</kbd> today.
-          </Bullet>
+          <Bullet>A quick tour: creating goals, logging time, checking your week, then your settings.</Bullet>
+          <Bullet>It takes about a minute, and you can skip it and come back from Settings any time.</Bullet>
         </ul>
+      ),
+    },
+    {
+      title: 'Create a goal',
+      intro: 'A goal is anything you want to spend time on, with a plan for how much.',
+      body: (
+        <>
+          <CreateGoalDemo />
+          <ul className="space-y-2 text-sm text-n-300">
+            <Bullet>
+              Plan time <strong className="text-n-100">per day</strong> (pick the days and hours for each), or a total <strong className="text-n-100">per week</strong> or <strong className="text-n-100">per month</strong>.
+            </Bullet>
+            <Bullet>
+              <span className="md:hidden">
+                Tap the <strong className="text-n-100">+</strong> button on Today, or <strong className="text-n-100">+ New</strong> on the Goals tab.
+              </span>
+              <span className="hidden md:inline">
+                Click <strong className="text-n-100">+ New goal</strong> in the sidebar, or press <kbd>N</kbd>.
+              </span>
+            </Bullet>
+          </ul>
+        </>
+      ),
+    },
+    {
+      title: 'Log time',
+      intro: 'Today lists the goals planned for the day. Log time with one tap.',
+      body: (
+        <>
+          <LogTimeDemo />
+          <ul className="space-y-2 text-sm text-n-300">
+            <Bullet>
+              The coloured button adds the goal's usual amount. <strong className="text-n-100">Other amount</strong> has more options, including a minus to fix mistakes.
+            </Bullet>
+            <Bullet>
+              Every log shows an <strong className="text-n-100">Undo</strong> button for a few seconds.
+            </Bullet>
+            <Bullet>
+              Forgot yesterday? Use the arrows next to the date<span className="hidden md:inline"> (or <kbd>←</kbd>/<kbd>→</kbd>)</span> to log time on another day.
+            </Bullet>
+          </ul>
+        </>
+      ),
+    },
+    {
+      title: 'Your progress',
+      intro: 'The Week tab shows time logged each day against your plan.',
+      body: (
+        <>
+          <WeekDemo />
+          <ul className="space-y-2 text-sm text-n-300">
+            <Bullet>Tap a day to open it, and swipe or use the arrows to change week.</Bullet>
+            <Bullet>
+              On the <strong className="text-n-100">Goals</strong> tab you can edit, reorder and archive goals, and copy a 🔗 link that logs time in one tap.
+            </Bullet>
+            <Bullet className="hidden md:flex">
+              Shortcuts: <kbd>N</kbd> new goal, <kbd>1</kbd>–<kbd>4</kbd> tabs, <kbd>←</kbd>/<kbd>→</kbd> change day, <kbd>T</kbd> today.
+            </Bullet>
+          </ul>
+        </>
       ),
     },
     {

@@ -4,7 +4,7 @@ All notable changes to Disciplined Times. The project uses [Semantic Versioning]
 
 ## 0.4.0
 
-- **Welcome tour:** on your first visit, a short walkthrough explains the app and goes through every setting (theme and light/dark mode, which day the week starts, installing as an app, and how your data is stored). Changes you make there apply right away. It ends with buttons to create your first goal or open Settings with the install section in view.
+- **Welcome tour:** on your first visit, a short walkthrough shows how to create a goal, log time (with a sample goal you can try, nothing is saved) and read the Week chart, then goes through every setting (theme and light/dark mode, which day the week starts, installing as an app, and how your data is stored). Changes you make there apply right away. It ends with buttons to create your first goal or open Settings with the install section in view.
 - **Settings:** **Take the tour** shows the walkthrough again any time. People who already have goals or logged time won't see it on its own.
 
 ## 0.3.1
