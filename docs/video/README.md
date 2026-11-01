@@ -5,8 +5,8 @@ A 38-second narrated promo for Disciplined Times, made with [HyperFrames](https:
 Everything that gets rendered lives in `output/`:
 
 - **`disciplined-times.mp4`**: the finished video (1920×1080, 30 fps, with narration, music and sound effects).
-- **`poster.jpg`**: the thumbnail the main README shows. Clicking it opens the MP4 (GitHub can't play a video stored in the repo inline).
-- **`preview.gif`**: a silent, looping preview for places that can't play video.
+- **`preview.gif`**: the silent, looping preview the main README shows. Clicking it opens the MP4 (GitHub only plays videos uploaded through its editor inline, not ones stored in the repo).
+- **`poster.jpg`**: a still thumbnail with a play button, for places where a GIF is too heavy.
 
 ## What's in the video
 
