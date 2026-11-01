@@ -5,9 +5,10 @@ import { externalHref } from '../lib/links'
 import { Appearance } from './Appearance'
 import { Changelog } from './Changelog'
 import { InstallCard, isStandalone } from './Install'
+import { WeekStart } from './WeekStart'
 
-export function Settings() {
-  const { settings, updateSettings, importData, reset, goals, logs } = useStore()
+export function Settings({ onTour }: { onTour: () => void }) {
+  const { importData, reset, goals, logs } = useStore()
   const notify = useUi((s) => s.notify)
   const fileRef = useRef<HTMLInputElement>(null)
   const [changelogOpen, setChangelogOpen] = useState(false)
@@ -34,7 +35,6 @@ export function Settings() {
   }
 
   const card = 'rounded-3xl border border-n-800 bg-n-900 p-4 space-y-4'
-  const seg = (on: boolean) => `rounded-xl px-3 py-1.5 text-sm font-semibold ${on ? 'bg-n-700 text-n-100' : 'text-n-400'}`
 
   return (
     <div className="space-y-5">
@@ -44,19 +44,7 @@ export function Settings() {
 
       <InstallCard />
 
-      <section className={card}>
-        <div className="flex items-center justify-between">
-          <span className="font-medium">Week starts on</span>
-          <div className="flex gap-1 rounded-2xl bg-n-950 p-1">
-            <button className={seg(settings.weekStartsOn === 1)} onClick={() => updateSettings({ weekStartsOn: 1 })}>
-              Monday
-            </button>
-            <button className={seg(settings.weekStartsOn === 0)} onClick={() => updateSettings({ weekStartsOn: 0 })}>
-              Sunday
-            </button>
-          </div>
-        </div>
-      </section>
+      <WeekStart />
 
       <section className={card}>
         <div>
@@ -93,9 +81,14 @@ export function Settings() {
             <div className="font-medium">Disciplined Times</div>
             <p className="text-sm text-n-400">Version {__APP_VERSION__}</p>
           </div>
-          <button onClick={() => setChangelogOpen(true)} className="shrink-0 rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
-            View changelog
-          </button>
+          <div className="flex flex-wrap justify-end gap-2">
+            <button onClick={onTour} className="shrink-0 rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
+              Take the tour
+            </button>
+            <button onClick={() => setChangelogOpen(true)} className="shrink-0 rounded-2xl bg-n-800 px-4 py-2 text-sm font-semibold hover:bg-n-700">
+              View changelog
+            </button>
+          </div>
         </div>
       </section>
       <Changelog open={changelogOpen} onClose={() => setChangelogOpen(false)} />

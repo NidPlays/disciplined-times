@@ -3,11 +3,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { GoalEditor } from './components/GoalEditor'
 import { Goals } from './components/Goals'
 import { Notices } from './components/Notices'
+import { Onboarding } from './components/Onboarding'
 import { QuickLog } from './components/QuickLog'
 import { Settings } from './components/Settings'
 import { ToastHost } from './components/Toast'
 import { Today } from './components/Today'
 import { Week } from './components/Week'
+import { firstRun } from './lib/onboarding'
 import { formatMinutes, toKey } from './lib/schedule'
 import { useStore } from './lib/store'
 import { applyTheme } from './lib/themes'
@@ -55,6 +57,14 @@ export default function App() {
   const openEdit = useCallback((goal: Goal) => setEditing({ open: true, goal }), [])
   const closeEditor = useCallback(() => setEditing((e) => ({ ...e, open: false })), [])
   const closeQuick = useCallback(() => setQuick((q) => ({ ...q, open: false })), [])
+  const [tour, setTour] = useState(firstRun)
+  const closeTour = useCallback(() => setTour(false), [])
+  const openTour = useCallback(() => setTour(true), [])
+  // From the tour's last step: land on Settings with the install section in view.
+  const showSettings = useCallback(() => {
+    setTab('settings')
+    requestAnimationFrame(() => document.getElementById('install')?.scrollIntoView({ block: 'start' }))
+  }, [])
 
   // Handle deep links from home-screen shortcuts and copied quick-log links:
   //   /?action=quick-log&minutes=30   → pick a goal, add 30 min
@@ -113,7 +123,7 @@ export default function App() {
   // Desktop keyboard shortcuts: N = new goal, 1-4 = tabs, ←/→ = change day, T = today.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey || editing.open || quick.open) return
+      if (e.metaKey || e.ctrlKey || e.altKey || editing.open || quick.open || tour) return
       const el = e.target as HTMLElement
       if (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return
       const k = e.key.toLowerCase()
@@ -129,7 +139,7 @@ export default function App() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [editing.open, quick.open, openNew, go])
+  }, [editing.open, quick.open, tour, openNew, go])
 
   const navIcon = (d: string) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -179,7 +189,7 @@ export default function App() {
             />
           )}
           {tab === 'goals' && <Goals onEdit={openEdit} onNew={openNew} />}
-          {tab === 'settings' && <Settings />}
+          {tab === 'settings' && <Settings onTour={openTour} />}
         </div>
       </main>
 
@@ -212,6 +222,7 @@ export default function App() {
 
       <GoalEditor open={editing.open} goal={editing.goal} onClose={closeEditor} />
       <QuickLog open={quick.open} minutes={quick.minutes} onClose={closeQuick} />
+      <Onboarding open={tour} onClose={closeTour} onNewGoal={openNew} onSettings={showSettings} />
       <ToastHost />
     </div>
   )
