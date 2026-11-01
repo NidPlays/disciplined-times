@@ -262,10 +262,32 @@ for i, tt in enumerate([33.0, 33.5, 34.0]):
 place(sfx, 34.6, bell(96, 1.5), 0.3)
 place(sfx, 34.66, bell(100, 1.5), 0.25)
 
+# ---------- narration (clips from narration/make.sh) ----------
+
+voice = np.zeros_like(music)
+lines = [l for l in (HERE / 'narration' / 'lines.tsv').read_text().splitlines() if l and not l.startswith('#')]
+for n, line in enumerate(lines, 1):
+    clip = HERE / 'narration' / f'line{n:02d}.wav'
+    if not clip.exists():
+        continue
+    with wave.open(str(clip)) as w:
+        rate = w.getframerate()
+        data = np.frombuffer(w.readframes(w.getnframes()), dtype='<i2').astype(float) / 32768
+        if w.getnchannels() == 2:
+            data = data.reshape(-1, 2).mean(axis=1)
+    if rate != SR:
+        data = np.interp(np.arange(int(len(data) * SR / rate)) * rate / SR, np.arange(len(data)), data)
+    place(voice, float(line.split('\t')[0]), data)
+
+# Duck the music ~9 dB while someone is talking, with smooth attack/release
+# so the bed breathes back in between lines.
+talking = np.convolve((np.abs(voice) > 0.02).astype(float), np.ones(int(0.15 * SR)), 'same') > 0
+duck_v = lowpass(np.where(talking, 0.35, 1.0), 1 / (0.08 * SR))
+
 # ---------- mix ----------
 
-mix = music * 0.55 + sfx * 0.7
-mix = np.tanh(mix * 1.2)  # gentle soft-clip glue
+mix = music * 0.55 * duck_v + sfx * 0.55 + voice * 1.6
+mix = np.tanh(mix * 1.1)  # gentle soft-clip glue
 mix /= np.max(np.abs(mix)) / 0.89
 stereo = np.stack([mix, mix], axis=1)
 

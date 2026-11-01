@@ -4,7 +4,7 @@ All notable changes to Disciplined Times. The project uses [Semantic Versioning]
 
 ## 0.5.3
 
-- New **promo video**: a 38-second tour of planning, one-tap logging, the Week view and themes. It plays at the top of the README, and its source (made with HyperFrames) is in `docs/video`. No changes to the app.
+- New **promo video**: a 38-second narrated tour of planning, one-tap logging, the Week view and themes. It's linked at the top of the README, and its source (made with HyperFrames) is in `docs/video`. No changes to the app.
 
 ## 0.5.2
 
