@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { KEYBOARD, keyLabel, keyName, matchShortcut, SHORTCUTS, type Shortcut } from '../lib/shortcuts'
+import { detectPlatform, keyboardFor, keyLabel, keyName, matchShortcut, PLATFORMS, SHORTCUTS, type Platform, type Shortcut } from '../lib/shortcuts'
 import { Sheet } from './Sheet'
 
 const GROUPS = ['Navigation', 'Today', 'General'] as const
 
-const Combo = ({ s }: { s: Shortcut }) => (
+const Combo = ({ s, platform }: { s: Shortcut; platform: Platform }) => (
   <span className="flex shrink-0 items-center gap-1">
     {s.keys.map((k, i) => (
       <span key={k} className="flex items-center gap-1">
         {i > 0 && <span className="text-xs text-n-400">+</span>}
-        <kbd className="min-w-7 rounded-lg border border-n-700 bg-n-950 px-1.5 py-0.5 text-center text-xs font-semibold text-n-200">{keyLabel(k)}</kbd>
+        <kbd className="min-w-7 rounded-lg border border-n-700 bg-n-950 px-1.5 py-0.5 text-center text-xs font-semibold text-n-200">{keyLabel(k, platform)}</kbd>
       </span>
     ))}
   </span>
@@ -22,6 +22,7 @@ const Combo = ({ s }: { s: Shortcut }) => (
  */
 export function Shortcuts({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [sel, setSel] = useState(SHORTCUTS[0].id)
+  const [platform, setPlatform] = useState<Platform>(() => detectPlatform(navigator as Navigator & { userAgentData?: { platform?: string } }))
   // Bumped on every selection so the "pressed" animation replays, even for the same shortcut.
   const [beat, setBeat] = useState(0)
   const list = useRef<HTMLUListElement>(null)
@@ -55,6 +56,7 @@ export function Shortcuts({ open, onClose }: { open: boolean; onClose: () => voi
   }, [open, sel])
 
   const lit = new Set(current.keys)
+  const spoken = (sc: Shortcut) => sc.keys.map((k) => keyName(k, platform)).join(' plus ')
 
   return (
     <Sheet open={open} onClose={onClose} title="Keyboard shortcuts" wide>
@@ -62,14 +64,14 @@ export function Shortcuts({ open, onClose }: { open: boolean; onClose: () => voi
         <div className="space-y-3">
           <div className="flex min-h-9 flex-wrap items-center justify-between gap-2" aria-live="polite">
             <span className="font-semibold">{current.label}</span>
-            <span className="sr-only">: {current.keys.map(keyName).join(' plus ')}</span>
+            <span className="sr-only">: {spoken(current)}</span>
             <span aria-hidden>
-              <Combo s={current} />
+              <Combo s={current} platform={platform} />
             </span>
           </div>
 
           <div className="space-y-1 rounded-2xl border border-n-800 bg-n-950 p-2 sm:space-y-1.5 sm:p-3" aria-hidden>
-            {KEYBOARD.map((row, r) => (
+            {keyboardFor(platform).map((row, r) => (
               <div key={r} className="flex gap-1 sm:gap-1.5">
                 {row.map((k) => {
                   const on = lit.has(k.id)
@@ -81,14 +83,30 @@ export function Shortcuts({ open, onClose }: { open: boolean; onClose: () => voi
                         on ? 'animate-press border-accent bg-accent text-on-accent' : 'border-n-800 border-b-n-700 bg-n-900 text-n-400'
                       }`}
                     >
-                      <span className="truncate px-0.5">{k.id === 'space' ? '' : keyLabel(k.id)}</span>
+                      <span className="truncate px-0.5">{keyLabel(k.id, platform)}</span>
                     </div>
                   )
                 })}
               </div>
             ))}
           </div>
-          <p className="text-xs text-n-400">Pick a shortcut below, or press its keys, to see where they are. Use ↑/↓ to move through the list.</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-n-400">Pick a shortcut below, or press its keys, to see where they are. Use ↑/↓ to move through the list.</p>
+            <div className="flex gap-1 rounded-2xl bg-n-950 p-1" role="radiogroup" aria-label="Keyboard type">
+              {PLATFORMS.map((p) => (
+                <button
+                  key={p.id}
+                  role="radio"
+                  aria-checked={platform === p.id}
+                  onClick={() => setPlatform(p.id)}
+                  className={`rounded-xl px-3 py-1 text-xs font-semibold ${platform === p.id ? 'bg-n-700 text-n-100' : 'text-n-400 hover:text-n-200'}`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="text-xs text-n-400">Shortcuts are single keys, so they never clash with {platform === 'mac' ? '⌘ Cmd, ⌥ Option or ⌃ Control' : platform === 'windows' ? 'Ctrl, Alt or Win key' : 'Ctrl, Alt or Super key'} combos. They also work on other keyboard layouts.</p>
         </div>
 
         <ul ref={list} className="space-y-4">
@@ -103,14 +121,14 @@ export function Shortcuts({ open, onClose }: { open: boolean; onClose: () => voi
                       onClick={() => select(s.id)}
                       onFocus={() => s.id !== sel && select(s.id)}
                       aria-pressed={s.id === sel}
-                      aria-label={`${s.label}: ${s.keys.map(keyName).join(' plus ')}${s.where ? `, on ${s.where}` : ''}`}
+                      aria-label={`${s.label}: ${spoken(s)}${s.where ? `, on ${s.where}` : ''}`}
                       className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm ${s.id === sel ? 'bg-n-800 text-n-100' : 'text-n-300 hover:bg-n-800/60'}`}
                     >
                       <span className="min-w-0">
                         {s.label}
                         {s.where && <span className="text-xs text-n-400"> · on {s.where}</span>}
                       </span>
-                      <Combo s={s} />
+                      <Combo s={s} platform={platform} />
                     </button>
                   </li>
                 ))}

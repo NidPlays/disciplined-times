@@ -4,7 +4,8 @@ All notable changes to Disciplined Times. The project uses [Semantic Versioning]
 
 ## 0.5.0
 
-- **Keyboard shortcuts:** press `?` (or click **Keyboard shortcuts** at the bottom of the sidebar) to see every shortcut. Pick one, or just press its keys, and a keyboard picture above the list lights up the keys to press.
+- **Keyboard shortcuts:** press `?` (or click **Keyboard shortcuts** at the bottom of the sidebar) to see every shortcut. Pick one, or just press its keys, and a keyboard picture above the list lights up the keys to press. The keyboard matches your computer (Mac, Windows or Linux) and you can switch between them.
+- Shortcuts now also work on non-English keyboard layouts (for example Russian, Greek or French AZERTY), and never fire together with Ctrl, Cmd, Alt/Option or AltGr.
 
 ## 0.4.0
 
