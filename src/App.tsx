@@ -6,11 +6,13 @@ import { Notices } from './components/Notices'
 import { Onboarding } from './components/Onboarding'
 import { QuickLog } from './components/QuickLog'
 import { Settings } from './components/Settings'
+import { Shortcuts } from './components/Shortcuts'
 import { ToastHost } from './components/Toast'
 import { Today } from './components/Today'
 import { Week } from './components/Week'
 import { firstRun } from './lib/onboarding'
 import { formatMinutes, toKey } from './lib/schedule'
+import { matchShortcut } from './lib/shortcuts'
 import { useStore } from './lib/store'
 import { applyTheme } from './lib/themes'
 import type { Goal } from './lib/types'
@@ -58,6 +60,8 @@ export default function App() {
   const closeEditor = useCallback(() => setEditing((e) => ({ ...e, open: false })), [])
   const closeQuick = useCallback(() => setQuick((q) => ({ ...q, open: false })), [])
   const [tour, setTour] = useState(firstRun)
+  const [help, setHelp] = useState(false)
+  const closeHelp = useCallback(() => setHelp(false), [])
   const closeTour = useCallback(() => setTour(false), [])
   const openTour = useCallback(() => setTour(true), [])
   // From the tour's last step: land on Settings with the install section in view.
@@ -120,26 +124,29 @@ export default function App() {
     setTab(t)
   }, [])
 
-  // Desktop keyboard shortcuts: N = new goal, 1-4 = tabs, ←/→ = change day, T = today.
+  // Desktop keyboard shortcuts, defined in lib/shortcuts.ts (also listed in the ? dialog).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey || editing.open || quick.open || tour) return
+      if (editing.open || quick.open || tour || help) return
       const el = e.target as HTMLElement
       if (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return
-      const k = e.key.toLowerCase()
-      if (k === 'n') openNew()
-      else if (k >= '1' && k <= '4') go(TABS[Number(k) - 1].id)
-      else if (tabRef.current === 'today' && k === 'arrowleft') setDay((d) => addDays(d, -1))
-      else if (tabRef.current === 'today' && k === 'arrowright') setDay((d) => addDays(d, 1))
-      else if (k === 't') {
+      const s = matchShortcut(e)
+      if (!s) return
+      const onToday = tabRef.current === 'today'
+      if (s.id === 'new-goal') openNew()
+      else if (s.id.startsWith('tab-')) go(s.id.slice(4) as Tab)
+      else if (s.id === 'prev-day' && onToday) setDay((d) => addDays(d, -1))
+      else if (s.id === 'next-day' && onToday) setDay((d) => addDays(d, 1))
+      else if (s.id === 'today') {
         setTab('today')
         setDay(new Date())
-      } else return
+      } else if (s.id === 'help') setHelp(true)
+      else return
       e.preventDefault()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [editing.open, quick.open, tour, openNew, go])
+  }, [editing.open, quick.open, tour, help, openNew, go])
 
   const navIcon = (d: string) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -172,9 +179,11 @@ export default function App() {
         <button onClick={openNew} className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-accent px-3 py-2.5 text-sm font-semibold text-on-accent hover:bg-accent-hover">
           + New goal <kbd className="rounded border border-current/30 px-1 text-xs">N</kbd>
         </button>
-        <p className="mt-auto px-2 text-xs leading-relaxed text-n-400">
-          Shortcuts: <kbd>N</kbd> new goal · <kbd>1–4</kbd> tabs · <kbd>←</kbd>/<kbd>→</kbd> day · <kbd>T</kbd> today
-        </p>
+        <button onClick={() => setHelp(true)} className="mt-auto flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-n-400 hover:bg-n-900 hover:text-n-200">
+          {navIcon('M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM7 10h.01M11 10h.01M15 10h.01M7 14h10')}
+          <span className="flex-1 text-left">Keyboard shortcuts</span>
+          <kbd className="text-xs text-n-500">?</kbd>
+        </button>
       </aside>
 
       <main className="pt-safe min-w-0 flex-1 px-4 pb-28 md:px-8 md:pt-8 md:pb-12">
@@ -222,6 +231,7 @@ export default function App() {
 
       <GoalEditor open={editing.open} goal={editing.goal} onClose={closeEditor} />
       <QuickLog open={quick.open} minutes={quick.minutes} onClose={closeQuick} />
+      <Shortcuts open={help} onClose={closeHelp} />
       <Onboarding open={tour} onClose={closeTour} onNewGoal={openNew} onSettings={showSettings} />
       <ToastHost />
     </div>

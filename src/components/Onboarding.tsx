@@ -108,7 +108,7 @@ export function Onboarding({ open, onClose, onNewGoal, onSettings }: Props) {
               On the <strong className="text-n-100">Goals</strong> tab you can edit, reorder and archive goals, and copy a 🔗 link that logs time in one tap.
             </Bullet>
             <Bullet className="hidden md:flex">
-              Shortcuts: <kbd>N</kbd> new goal, <kbd>1</kbd>–<kbd>4</kbd> tabs, <kbd>←</kbd>/<kbd>→</kbd> change day, <kbd>T</kbd> today.
+              Shortcuts: <kbd>N</kbd> new goal, <kbd>1</kbd>–<kbd>4</kbd> tabs, <kbd>←</kbd>/<kbd>→</kbd> change day, <kbd>T</kbd> today. Press <kbd>?</kbd> to see them all.
             </Bullet>
           </ul>
         </>
